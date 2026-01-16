@@ -1,0 +1,163 @@
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const CalendarContext = createContext();
+
+export const useCalendar = () => useContext(CalendarContext);
+
+export const CalendarProvider = ({ children }) => {
+    // State
+    const [events, setEvents] = useState([]);
+    const [locations, setLocations] = useState([]);
+    const [participantsList, setParticipantsList] = useState([]);
+    const [view, setView] = useState('week');
+    const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 12)); // Start at Jan 12, 2026
+
+    // API Base URL - In development this proxies, in prod it's relative
+    // We will assume a proxy is set up or use a relative path if served from same origin
+    const API_BASE = '/api';
+
+    // Fetch Data on Mount
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            console.log('Fetching calendar data...');
+            const [eventsRes, locRes, partRes] = await Promise.all([
+                fetch(`${API_BASE}/events`),
+                fetch(`${API_BASE}/locations`),
+                fetch(`${API_BASE}/participants`)
+            ]);
+
+            if (eventsRes.ok) {
+                const eventsData = await eventsRes.json();
+                setEvents(eventsData.map(e => ({
+                    ...e,
+                    start: new Date(e.start),
+                    end: new Date(e.end)
+                })));
+            } else {
+                console.error('Failed to fetch events');
+            }
+
+            if (locRes.ok) setLocations(await locRes.json());
+            if (partRes.ok) setParticipantsList(await partRes.json());
+
+        } catch (error) {
+            console.error("Failed to fetch calendar data", error);
+        }
+    };
+
+    const addLocation = async (loc) => {
+        if (!locations.includes(loc)) {
+            const newLocations = [...locations, loc];
+            setLocations(newLocations); // Optimistic
+            try {
+                await fetch(`${API_BASE}/locations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newLocations)
+                });
+            } catch (e) {
+                console.error("Error saving location", e);
+            }
+        }
+    };
+
+    const addParticipant = async (part) => {
+        if (!participantsList.includes(part)) {
+            const newList = [...participantsList, part];
+            setParticipantsList(newList); // Optimistic
+            try {
+                await fetch(`${API_BASE}/participants`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newList)
+                });
+            } catch (e) {
+                console.error("Error saving participant", e);
+            }
+        }
+    };
+
+    const addEvent = async (event) => {
+        const newEvent = { ...event, id: crypto.randomUUID() };
+        const newEventsList = [...events, newEvent];
+        setEvents(newEventsList); // Optimistic
+
+        try {
+            await fetch(`${API_BASE}/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newEventsList)
+            });
+        } catch (e) {
+            console.error("Error saving event", e);
+        }
+    };
+
+    const updateEvent = async (updatedEvent) => {
+        const newEventsList = events.map(e => e.id === updatedEvent.id ? updatedEvent : e);
+        setEvents(newEventsList); // Optimistic
+
+        try {
+            await fetch(`${API_BASE}/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newEventsList)
+            });
+        } catch (e) {
+            console.error("Error updating event", e);
+        }
+    };
+
+    const moveEvent = async (eventId, newDate) => {
+        const event = events.find(e => e.id === eventId);
+        if (!event) return;
+
+        const duration = event.end.getTime() - event.start.getTime();
+        const newStart = new Date(newDate);
+        newStart.setHours(event.start.getHours(), event.start.getMinutes());
+
+        const newEnd = new Date(newStart.getTime() + duration);
+        const updatedEvent = { ...event, start: newStart, end: newEnd };
+
+        await updateEvent(updatedEvent);
+    };
+
+    const deleteEvent = async (id) => {
+        const newEventsList = events.filter(e => e.id !== id);
+        setEvents(newEventsList); // Optimistic
+
+        try {
+            await fetch(`${API_BASE}/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newEventsList)
+            });
+        } catch (e) {
+            console.error("Error deleting event", e);
+        }
+    };
+
+    const nextMonth = () => {
+        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    };
+
+    const prevMonth = () => {
+        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    };
+
+    return (
+        <CalendarContext.Provider value={{
+            events, view, setView, currentDate, setCurrentDate,
+            locations, participantsList, addLocation, addParticipant,
+            addEvent, updateEvent, deleteEvent, moveEvent,
+            nextMonth, prevMonth
+        }}>
+            {children}
+        </CalendarContext.Provider>
+    );
+};
