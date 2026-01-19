@@ -24,7 +24,7 @@ export const CalendarProvider = ({ children }) => {
 
     const fetchData = async () => {
         try {
-            console.log('Fetching calendar data...');
+            // console.log('Fetching calendar data...');
             const [eventsRes, locRes, partRes] = await Promise.all([
                 fetch(`${API_BASE}/events`),
                 fetch(`${API_BASE}/locations`),
@@ -95,6 +95,7 @@ export const CalendarProvider = ({ children }) => {
             });
         } catch (e) {
             console.error("Error saving event", e);
+            alert("Error al guardar el evento");
         }
     };
 
@@ -110,6 +111,7 @@ export const CalendarProvider = ({ children }) => {
             });
         } catch (e) {
             console.error("Error updating event", e);
+            alert("Error al actualizar el evento");
         }
     };
 
@@ -139,6 +141,7 @@ export const CalendarProvider = ({ children }) => {
             });
         } catch (e) {
             console.error("Error deleting event", e);
+            alert("Error al eliminar el evento. Verifique su conexión.");
         }
     };
 

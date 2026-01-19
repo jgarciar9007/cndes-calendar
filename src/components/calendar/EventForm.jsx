@@ -32,7 +32,10 @@ const EventForm = ({ onClose, initialEvent = null }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!formData.title || !formData.date || !formData.startTime || !formData.endTime) return;
+        if (!formData.title || !formData.date || !formData.startTime || !formData.endTime) {
+            alert('Por favor, complete todos los campos obligatorios (Asunto, Fecha, Inicio, Fin).');
+            return;
+        }
 
         // Combine date and time
         const startDateTime = new Date(`${formData.date}T${formData.startTime}`);

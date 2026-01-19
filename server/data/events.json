@@ -252,7 +252,6 @@
     ]
   },
   {
-    "id": "evt-2026-01-12-1",
     "title": "Reunión de concertación GEPETROL S.A.",
     "start": "2026-01-12T08:00:00.000Z",
     "end": "2026-01-12T10:00:00.000Z",
@@ -265,7 +264,10 @@
       "Directores Generales",
       "Coordinadores Sectoriales",
       "Consultores"
-    ]
+    ],
+    "description": "",
+    "attachments": [],
+    "id": "evt-2026-01-12-1"
   },
   {
     "id": "evt-2026-01-12-2",
@@ -2170,5 +2172,31 @@
       "Coordinadores Sectoriales",
       "Consultores"
     ]
+  },
+  {
+    "title": "test",
+    "start": "2026-01-10T08:00:00.000Z",
+    "end": "2026-01-10T09:00:00.000Z",
+    "location": "PALACIO DEL PUEBLO",
+    "participants": [
+      "Presidente"
+    ],
+    "description": "",
+    "attachments": [],
+    "id": "21006c0f-eb05-4270-b6ba-2abd75025259"
+  },
+  {
+    "title": "test",
+    "start": "2026-01-10T08:00:00.000Z",
+    "end": "2026-01-10T09:00:00.000Z",
+    "location": "SALA DE PLENOS",
+    "participants": [
+      "Miembros",
+      "Consejeros",
+      "Secretario General"
+    ],
+    "description": "",
+    "attachments": [],
+    "id": "7fcff402-45ef-437f-b719-5be9dbdfa94d"
   }
 ]

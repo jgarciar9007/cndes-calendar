@@ -3,12 +3,27 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs-extra');
+const helmet = require('helmet');
+const compression = require('compression');
 const seedData = require('./seedData');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.use(compression()); // Compress all responses
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "blob:"],
+            connectSrc: ["'self'"]
+        }
+    }
+}));
 app.use(cors());
 app.use(express.json({ limit: '50mb' })); // Support large payloads if needed
 
