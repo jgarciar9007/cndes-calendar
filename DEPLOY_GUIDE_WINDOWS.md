@@ -60,8 +60,8 @@ Puede ejecutar el servidor manualmente para probar, o usar un gestor de procesos
 ```powershell
 node index.js
 ```
-El servidor debería iniciar en el puerto **3000** (por defecto) y mostrará:
-`Server running on port 3000`
+El servidor debería iniciar en el puerto **3002** (por defecto) y mostrará:
+`Server running on port 3002`
 
 **Opción B: Usar PM2 (Recomendado para Producción)**
 1.  Instale PM2 globalmente: `npm install -g pm2`
@@ -70,7 +70,7 @@ El servidor debería iniciar en el puerto **3000** (por defecto) y mostrará:
 
 ## Paso 5: Configurar IIS como Proxy Reverso
 
-Para que la aplicación sea accesible por el puerto 80/443 sin exponer directamente el puerto 3000 y para integrarse con la infraestructura existente:
+Para que la aplicación sea accesible por el puerto 80/443 sin exponer directamente el puerto 3002 y para integrarse con la infraestructura existente:
 
 1.  Abra **Administrador de IIS**.
 2.  Cree un nuevo sitio web o use uno existente (ej: `AgendaCNDES`) apuntando a una carpeta vacía o a la carpeta del proyecto (la ruta física no importa tanto si usamos proxy, pero puede apuntar a `C:\inetpub\wwwroot\agenda-cndes`).
@@ -78,11 +78,11 @@ Para que la aplicación sea accesible por el puerto 80/443 sin exponer directame
 4.  En el panel derecho, haga clic en **Add Rule(s)...** -> **Reverse Proxy**.
     *   Si le pide habilitar el proxy, acepte.
 5.  En "Inbound Rules", ingrese la dirección del servidor Node.js:
-    *   **Server name or IP address**: `localhost:3000`
+    *   **Server name or IP address**: `localhost:3002`
 6.  Marque "SSL Offloading" según sus necesidades.
 7.  Haga clic en **OK**.
 
-Ahora, todas las peticiones que lleguen a su sitio IIS serán redirigidas internamente a `http://localhost:3000`, donde su servidor Node.js las procesará y devolverá la aplicación React o los datos de la API.
+Ahora, todas las peticiones que lleguen a su sitio IIS serán redirigidas internamente a `http://localhost:3002`, donde su servidor Node.js las procesará y devolverá la aplicación React o los datos de la API.
 
 ## Paso 6: Persistencia y Permisos
 
@@ -98,4 +98,4 @@ Ahora, todas las peticiones que lleguen a su sitio IIS serán redirigidas intern
 *   Verifique los permisos de escritura en esa carpeta.
 
 ### Error 502 Bad Gateway
-*   Significa que IIS no puede conectar con Node.js. Asegúrese de que el servidor Node.js está corriendo en el puerto 3000 (`pm2 status` o revise su consola).
+*   Significa que IIS no puede conectar con Node.js. Asegúrese de que el servidor Node.js está corriendo en el puerto 3002 (`pm2 status` o revise su consola).
