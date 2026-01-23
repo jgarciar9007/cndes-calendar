@@ -6,6 +6,7 @@ const fs = require('fs-extra');
 const helmet = require('helmet');
 const compression = require('compression');
 const seedData = require('./seedData');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
