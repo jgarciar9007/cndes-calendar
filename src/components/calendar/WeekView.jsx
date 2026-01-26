@@ -104,8 +104,14 @@ const WeekView = ({ onEventClick }) => {
                         {/* Day Columns with Events */}
                         {weekDays.map((day, i) => {
                             const dayEvents = getEventsForDay(day);
+                            const isToday = isSameDay(day, new Date());
                             return (
-                                <div key={i} style={{ position: 'relative', borderRight: i < 6 ? '1px solid #f3f4f6' : 'none', height: '100%' }}>
+                                <div key={i} style={{
+                                    position: 'relative',
+                                    borderRight: i < 6 ? '1px solid #f3f4f6' : 'none',
+                                    height: '100%',
+                                    backgroundColor: isToday ? 'rgba(59, 130, 246, 0.05)' : 'transparent'
+                                }}>
                                     {dayEvents.map(event => (
                                         <div
                                             key={event.id}

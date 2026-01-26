@@ -69,7 +69,8 @@ const DroppableDay = ({ day, events, isCurrentMonth, onClick, isAdmin, onEventCl
         <div
             ref={setNodeRef}
             style={{
-                backgroundColor: isOver ? '#f0f9ff' : 'var(--color-surface)',
+                backgroundColor: isOver ? '#f0f9ff' : (isToday ? 'rgba(59, 130, 246, 0.05)' : 'var(--color-surface)'),
+                boxShadow: isToday ? 'inset 0 0 0 2px #3b82f6' : 'none',
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',

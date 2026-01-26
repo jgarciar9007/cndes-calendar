@@ -11,7 +11,7 @@ export const CalendarProvider = ({ children }) => {
     const [locations, setLocations] = useState([]);
     const [participantsList, setParticipantsList] = useState([]);
     const [view, setView] = useState('week');
-    const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 12)); // Start at Jan 12, 2026
+    const [currentDate, setCurrentDate] = useState(new Date()); // Start at current date
 
     // API Base URL - In development this proxies, in prod it's relative
     // We will assume a proxy is set up or use a relative path if served from same origin
