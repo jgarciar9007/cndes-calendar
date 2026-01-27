@@ -148,36 +148,28 @@ app.post('/api/auth/login', (req, res) => {
 
 app.post('/api/auth/change-password', (req, res) => {
     try {
-        const { userId, currentPassword, newPassword } = req.body;
+        const { username, currentPassword, newPassword } = req.body;
 
-        // Verify current password first (security check)
-        // Since we don't have a robust session/token system yet, we require userId + currentPassword
-        // Ideally this would come from the session context, but for this simple app:
-
-        // Wait, we can technically just check if the user exists and update if we trust the "userId" from client 
-        // BUT better is to check "currentPassword" logic again.
-
-        // Let's assume the client sends userId (which they have in state)
-        // We really should fetch the user by ID, check password, then update.
-        // My db helper only has `getByUsername`. Let's add `getById` or just hack it for now since I can't edit `db.js` easily again without another turn.
-        // Actually, I can just use `db.users.updatePassword` if I trust the flow, but let's be safer.
-        // Wait, I can't query by ID with the current exposed methods in `db.js`.
-        // `userQueries` only has `getByUsername` and `updatePassword`.
-        // So let's rely on the client sending the username as well, or just `username` instead of `userId`.
-
-        // Let's use username for verification.
-        const { username, newPassword: pwd } = req.body; // Expecting username in body
+        if (!username || !currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
 
         const user = db.users.getByUsername(username);
-        if (user) {
-            const success = db.users.updatePassword(user.id, pwd);
-            if (success) {
-                res.json({ success: true });
-            } else {
-                res.status(500).json({ error: 'Failed to update' });
-            }
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Verify current password
+        if (user.password !== currentPassword) {
+            return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
+        }
+
+        const success = db.users.updatePassword(user.id, newPassword);
+        if (success) {
+            res.json({ success: true });
         } else {
-            res.status(404).json({ error: 'User not found' });
+            res.status(500).json({ error: 'Failed to update password' });
         }
     } catch (error) {
         console.error("Password change error:", error);
