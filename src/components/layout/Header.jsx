@@ -3,12 +3,14 @@ import { User, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCalendar } from '../../context/CalendarContext';
+import UserProfileModal from './UserProfileModal';
 import logo from '../../assets/logo.png';
 
 const Header = () => {
     const { user, logout } = useAuth();
     const { setView, setCurrentDate } = useCalendar();
     const navigate = useNavigate();
+    const [isProfileOpen, setIsProfileOpen] = React.useState(false);
 
     const handleLogoClick = (e) => {
         e.preventDefault();
@@ -56,7 +58,12 @@ const Header = () => {
                 <nav className="flex items-center gap-4">
                     {user ? (
                         <div className="flex items-center gap-4">
-                            <span className="flex items-center gap-2" style={{ fontWeight: 500, fontSize: '0.9rem' }}>
+                            <span
+                                className="flex items-center gap-2"
+                                style={{ fontWeight: 500, fontSize: '0.9rem', cursor: 'pointer' }}
+                                onClick={() => setIsProfileOpen(true)}
+                                title="Editar pefil"
+                            >
                                 <div style={{ padding: '6px', backgroundColor: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <User size={16} />
                                 </div>
@@ -71,6 +78,7 @@ const Header = () => {
                     )}
                 </nav>
             </div >
+            {isProfileOpen && <UserProfileModal onClose={() => setIsProfileOpen(false)} />}
         </header >
     );
 };

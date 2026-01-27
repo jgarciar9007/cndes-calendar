@@ -29,6 +29,16 @@ function init() {
     `).run();
 
     db.prepare(`
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            username TEXT UNIQUE,
+            password TEXT,
+            name TEXT,
+            role TEXT
+        )
+    `).run();
+
+    db.prepare(`
         CREATE TABLE IF NOT EXISTS locations (
             name TEXT PRIMARY KEY
         )
@@ -90,9 +100,27 @@ function init() {
         insertMany(participants);
         console.log(`Migrated ${participants.length} participants.`);
     }
+
+    const userCount = db.prepare('SELECT count(*) as count FROM users').get();
+    if (userCount.count === 0) {
+        console.log('Initializing default admin user...');
+        const insert = db.prepare('INSERT INTO users (id, username, password, name, role) VALUES (?, ?, ?, ?, ?)');
+        // Default: admin / admin123
+        insert.run('usr-admin', 'admin', 'admin123', 'Administrador', 'admin');
+    }
 }
 
 // Data Access Object
+
+const userQueries = {
+    getByUsername: (username) => {
+        return db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+    },
+    updatePassword: (id, newPassword) => {
+        const info = db.prepare('UPDATE users SET password = ? WHERE id = ?').run(newPassword, id);
+        return info.changes > 0;
+    }
+};
 
 const eventQueries = {
     getAll: () => {
@@ -161,5 +189,6 @@ module.exports = {
     init,
     events: eventQueries,
     locations: locationQueries,
-    participants: participantQueries
+    participants: participantQueries,
+    users: userQueries
 };

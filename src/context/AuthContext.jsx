@@ -11,15 +11,25 @@ export const AuthProvider = ({ children }) => {
         return storedUser ? JSON.parse(storedUser) : null;
     });
 
-    const login = (username, password) => {
-        // Simple mock auth for demonstration
-        if (username === 'admin' && password === 'admin123') {
-            const userData = { name: 'Administrador', role: 'admin' };
-            setUser(userData);
-            localStorage.setItem('cndes_user', JSON.stringify(userData));
-            return true;
+    const login = async (username, password) => {
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setUser(data.user);
+                localStorage.setItem('cndes_user', JSON.stringify(data.user));
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error("Login attempt failed", error);
+            return false;
         }
-        return false;
     };
 
     const logout = () => {

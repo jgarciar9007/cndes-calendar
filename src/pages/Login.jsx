@@ -10,9 +10,10 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (login(username, password)) {
+        const success = await login(username, password);
+        if (success) {
             navigate('/');
         } else {
             setError('Credenciales incorrectas');
