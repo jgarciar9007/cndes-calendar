@@ -36,11 +36,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 fs.ensureDirSync(path.join(__dirname, 'uploads'));
 
 // Initialize Database
-try {
-    db.init();
-} catch (err) {
+// Initialize Database
+db.init().catch(err => {
     console.error("Database initialization failed:", err);
-}
+});
 
 // Multer Storage
 const storage = multer.diskStorage({
@@ -57,9 +56,9 @@ const upload = multer({ storage: storage });
 // --- API Routes ---
 
 // EVENTS
-app.get('/api/events', (req, res) => {
+app.get('/api/events', async (req, res) => {
     try {
-        const events = db.events.getAll();
+        const events = await db.events.getAll();
         res.json(events);
     } catch (error) {
         console.error("Error reading events:", error);
@@ -67,9 +66,9 @@ app.get('/api/events', (req, res) => {
     }
 });
 
-app.post('/api/events', (req, res) => {
+app.post('/api/events', async (req, res) => {
     try {
-        db.events.replaceAll(req.body);
+        await db.events.replaceAll(req.body);
         res.json({ success: true });
     } catch (error) {
         console.error("Error saving events:", error);
@@ -78,9 +77,9 @@ app.post('/api/events', (req, res) => {
 });
 
 // LOCATIONS
-app.get('/api/locations', (req, res) => {
+app.get('/api/locations', async (req, res) => {
     try {
-        const data = db.locations.getAll();
+        const data = await db.locations.getAll();
         res.json(data);
     } catch (error) {
         console.error("Error reading locations:", error);
@@ -88,9 +87,9 @@ app.get('/api/locations', (req, res) => {
     }
 });
 
-app.post('/api/locations', (req, res) => {
+app.post('/api/locations', async (req, res) => {
     try {
-        db.locations.replaceAll(req.body);
+        await db.locations.replaceAll(req.body);
         res.json({ success: true });
     } catch (error) {
         console.error("Error saving locations:", error);
@@ -99,9 +98,9 @@ app.post('/api/locations', (req, res) => {
 });
 
 // PARTICIPANTS
-app.get('/api/participants', (req, res) => {
+app.get('/api/participants', async (req, res) => {
     try {
-        const data = db.participants.getAll();
+        const data = await db.participants.getAll();
         res.json(data);
     } catch (error) {
         console.error("Error reading participants:", error);
@@ -109,9 +108,9 @@ app.get('/api/participants', (req, res) => {
     }
 });
 
-app.post('/api/participants', (req, res) => {
+app.post('/api/participants', async (req, res) => {
     try {
-        db.participants.replaceAll(req.body);
+        await db.participants.replaceAll(req.body);
         res.json({ success: true });
     } catch (error) {
         console.error("Error saving participants:", error);
@@ -120,10 +119,10 @@ app.post('/api/participants', (req, res) => {
 });
 
 // AUTH
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const user = db.users.getByUsername(username);
+        const user = await db.users.getByUsername(username);
 
         if (user && user.password === password) {
             // In a real app, use hashing (bcrypt) and JWT tokens.
@@ -146,7 +145,7 @@ app.post('/api/auth/login', (req, res) => {
     }
 });
 
-app.post('/api/auth/change-password', (req, res) => {
+app.post('/api/auth/change-password', async (req, res) => {
     try {
         const { username, currentPassword, newPassword } = req.body;
 
@@ -154,7 +153,7 @@ app.post('/api/auth/change-password', (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const user = db.users.getByUsername(username);
+        const user = await db.users.getByUsername(username);
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -165,7 +164,7 @@ app.post('/api/auth/change-password', (req, res) => {
             return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
         }
 
-        const success = db.users.updatePassword(user.id, newPassword);
+        const success = await db.users.updatePassword(user.id, newPassword);
         if (success) {
             res.json({ success: true });
         } else {
@@ -200,5 +199,4 @@ app.get(/.*/, (req, res) => {
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log(`Database initialized.`);
 });
