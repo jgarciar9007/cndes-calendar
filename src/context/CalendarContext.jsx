@@ -116,6 +116,23 @@ export const CalendarProvider = ({ children }) => {
             attachments: e.attachments || []
         }));
 
+        // Batch update unique locations and participants to avoid redundant requests and state conflicts
+        const newUniqueLocations = [...new Set(newEvents.map(e => e.location).filter(l => l && !locations.includes(l)))];
+        const allExtractedParticipants = newEvents.flatMap(e => e.participants || []);
+        const newUniqueParticipants = [...new Set(allExtractedParticipants.filter(p => p && !participantsList.includes(p)))];
+
+        if (newUniqueLocations.length > 0) {
+            const updatedLocs = [...locations, ...newUniqueLocations];
+            setLocations(updatedLocs);
+            fetch(`${API_BASE}/locations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedLocs) });
+        }
+
+        if (newUniqueParticipants.length > 0) {
+            const updatedParts = [...participantsList, ...newUniqueParticipants];
+            setParticipantsList(updatedParts);
+            fetch(`${API_BASE}/participants`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedParts) });
+        }
+
         const newEventsList = [...events, ...processedEvents];
         setEvents(newEventsList); // Optimistic
 

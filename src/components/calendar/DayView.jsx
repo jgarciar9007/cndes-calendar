@@ -1,7 +1,7 @@
 import React from 'react';
 import { format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Pencil, Trash2, Eye } from 'lucide-react';
+import { Pencil, Trash2, Eye, MapPin, Clock, Users, ChevronRight } from 'lucide-react';
 import { useCalendar } from '../../context/CalendarContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -16,149 +16,128 @@ const DayView = ({ onEventClick }) => {
 
     const handleDelete = (e, eventId) => {
         e.stopPropagation();
-        if (window.confirm('¿Estás seguro de que deseas eliminar este evento?')) {
+        if (window.confirm('¿Estás seguro de que deseas eliminar esta actividad?')) {
             deleteEvent(eventId);
         }
     };
 
     return (
-        <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-            <div className="card" style={{ padding: '2rem', overflow: 'hidden' }}>
-                <h3 style={{
-                    fontSize: '1.25rem',
-                    fontWeight: 700,
-                    marginBottom: '1.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    borderBottom: '1px solid var(--color-border)',
-                    paddingBottom: '1rem'
-                }}>
-                    <span style={{ color: 'var(--color-secondary)' }}>{format(currentDate, 'd')}</span>
-                    <span style={{ textTransform: 'capitalize' }}>{format(currentDate, 'MMMM yyyy', { locale: es })}</span>
-                </h3>
-
-                {dayEvents.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--color-text-light)' }}>
-                        No hay actividades programadas para este día.
-                    </div>
-                ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-light)', fontSize: '0.875rem' }}>
-                                    <th style={{ padding: '0.75rem 1rem' }}>#</th>
-                                    <th style={{ padding: '0.75rem 1rem' }}>Horario</th>
-                                    <th style={{ padding: '0.75rem 1rem' }}>Lugar</th>
-                                    <th style={{ padding: '0.75rem 1rem' }}>Asunto</th>
-                                    <th style={{ padding: '0.75rem 1rem' }}>Participantes</th>
-                                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {dayEvents.map((ev, index) => (
-                                    <tr
-                                        key={ev.id}
-                                        style={{
-                                            borderBottom: '1px solid #f1f5f9',
-                                            cursor: 'pointer',
-                                            transition: 'background-color 0.2s'
-                                        }}
-                                        onClick={() => onEventClick(ev)}
-                                        className="hover:bg-gray-50"
-                                    >
-                                        <td style={{ padding: '1rem', color: 'var(--color-text-light)', fontFamily: 'monospace' }}>{index + 1}</td>
-                                        <td style={{ padding: '1rem', fontWeight: 500, color: 'var(--color-primary)' }}>
-                                            {format(new Date(ev.start), 'HH:mm')} - {format(new Date(ev.end), 'HH:mm')}
-                                        </td>
-                                        <td style={{ padding: '1rem' }}>{ev.location}</td>
-                                        <td style={{ padding: '1rem', fontWeight: 600 }}>{ev.title}</td>
-                                        <td style={{ padding: '1rem', fontSize: '0.875rem', color: 'var(--color-text-light)' }}>
-                                            {ev.participants && Array.isArray(ev.participants) ? ev.participants.map((p, i) => (
-                                                <span key={i} style={{
-                                                    display: 'inline-block',
-                                                    backgroundColor: '#f1f5f9',
-                                                    padding: '2px 6px',
-                                                    borderRadius: '4px',
-                                                    marginRight: '4px',
-                                                    marginBottom: '2px'
-                                                }}>
-                                                    {p}
-                                                </span>
-                                            )) : ev.participants}
-                                        </td>
-                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
-                                                {isAdmin ? (
-                                                    <>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                onEventClick(ev);
-                                                            }}
-                                                            className="btn"
-                                                            style={{
-                                                                padding: '0.4rem 0.6rem',
-                                                                backgroundColor: '#eff6ff', // blue-50
-                                                                color: '#2563eb', // blue-600
-                                                                border: '1px solid transparent'
-                                                            }}
-                                                            title="Editar"
-                                                            onMouseEnter={(e) => {
-                                                                e.currentTarget.style.backgroundColor = '#dbeafe'; // blue-100
-                                                                e.currentTarget.style.borderColor = '#bfdbfe'; // blue-200
-                                                            }}
-                                                            onMouseLeave={(e) => {
-                                                                e.currentTarget.style.backgroundColor = '#eff6ff';
-                                                                e.currentTarget.style.borderColor = 'transparent';
-                                                            }}
-                                                        >
-                                                            <Pencil size={16} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => handleDelete(e, ev.id)}
-                                                            className="btn"
-                                                            style={{
-                                                                padding: '0.4rem 0.6rem',
-                                                                backgroundColor: '#fef2f2', // red-50
-                                                                color: '#dc2626', // red-600
-                                                                border: '1px solid transparent'
-                                                            }}
-                                                            title="Eliminar"
-                                                            onMouseEnter={(e) => {
-                                                                e.currentTarget.style.backgroundColor = '#fee2e2'; // red-100
-                                                                e.currentTarget.style.borderColor = '#fecaca'; // red-200
-                                                            }}
-                                                            onMouseLeave={(e) => {
-                                                                e.currentTarget.style.backgroundColor = '#fef2f2';
-                                                                e.currentTarget.style.borderColor = 'transparent';
-                                                            }}
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onEventClick(ev);
-                                                        }}
-                                                        className="btn btn-secondary"
-                                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem' }}
-                                                        title="Ver detalles"
-                                                    >
-                                                        <Eye size={16} style={{ marginRight: '0.25rem' }} /> Ver
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+        <div className="animate-fadeIn p-6 sm:p-10">
+            {/* Header Description */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 border-b border-slate-100 pb-8">
+                <div>
+                    <div className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-600 mb-2">Hoja de Ruta Diaria</div>
+                    <h3 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                        <span className="text-primary-600 bg-primary-50 w-12 h-12 flex items-center justify-center rounded-2xl shadow-sm">{format(currentDate, 'd')}</span>
+                        <span>{format(currentDate, 'MMMM yyyy', { locale: es })}</span>
+                    </h3>
+                </div>
+                {dayEvents.length > 0 && (
+                    <div className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-lg shadow-slate-900/10 self-start">
+                        {dayEvents.length} {dayEvents.length === 1 ? 'Actividad' : 'Actividades'}
                     </div>
                 )}
             </div>
+
+            {dayEvents.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
+                    <div className="w-20 h-20 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 flex items-center justify-center mb-6">
+                        <Clock size={32} className="text-slate-200" />
+                    </div>
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center">No hay actividades programadas</p>
+                    <p className="text-xs text-slate-300 font-bold mt-1">Seleccione 'Nueva Actividad' para comenzar</p>
+                </div>
+            ) : (
+                <div className="overflow-hidden bg-white/50 rounded-[2.5rem] border border-slate-100/60 shadow-sm">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-slate-100 bg-slate-50/30">
+                                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sec.</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cronograma</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actividad / Asunto</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Participantes</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ficha</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {dayEvents.map((ev, index) => (
+                                <tr
+                                    key={ev.id}
+                                    onClick={() => onEventClick(ev)}
+                                    className="group hover:bg-white cursor-pointer transition-all duration-300"
+                                >
+                                    <td className="px-6 py-7">
+                                        <span className="text-xs font-black text-slate-300 group-hover:text-primary-600 transition-colors uppercase tabular-nums">
+                                            #{String(index + 1).padStart(2, '0')}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-7 min-w-[140px]">
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2 text-sm font-black text-slate-700">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-primary-600"></div>
+                                                {format(new Date(ev.start), 'HH:mm')} - {format(new Date(ev.end), 'HH:mm')}
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wide truncate max-w-[120px]">
+                                                <MapPin size={12} className="shrink-0" />
+                                                {ev.location}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-7">
+                                        <div className="flex flex-col gap-0.5 max-w-sm">
+                                            <span className="text-[15px] font-black text-slate-900 group-hover:text-primary-600 transition-colors tracking-tight line-clamp-2 uppercase">
+                                                {ev.title}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-7 hidden lg:table-cell">
+                                        <div className="flex flex-wrap gap-1.5 max-w-xs">
+                                            {ev.participants && Array.isArray(ev.participants) && ev.participants.length > 0 ? (
+                                                ev.participants.slice(0, 2).map((p, i) => (
+                                                    <span key={i} className="text-[9px] font-black bg-slate-100 text-slate-500 border border-slate-200/50 px-2.5 py-1 rounded-lg truncate max-w-[120px] uppercase">
+                                                        {p}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <span className="text-[9px] font-bold text-slate-300 italic">Abierto</span>
+                                            )}
+                                            {ev.participants && ev.participants.length > 2 && (
+                                                <span className="text-[9px] font-black text-primary-600 px-2 py-1">+ {ev.participants.length - 2}</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-7 text-right">
+                                        <div className="flex items-center justify-end gap-2 pr-2">
+                                            {isAdmin ? (
+                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); onEventClick(ev); }}
+                                                        className="w-10 h-10 flex items-center justify-center bg-primary-50 text-primary-600 rounded-xl hover:bg-primary-600 hover:text-white transition-all shadow-sm"
+                                                        title="Editar"
+                                                    >
+                                                        <Pencil size={16} strokeWidth={2.5} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDelete(e, ev.id)}
+                                                        className="w-10 h-10 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 size={16} strokeWidth={2.5} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1.5 text-[10px] font-black text-primary-600 uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+                                                    Ver Detalles <ChevronRight size={14} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };

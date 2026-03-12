@@ -1,0 +1,200 @@
+﻿[1m[90m[TAILING] Tailing last 100 lines for [cndes-calendar-local] process (change the value with --lines option)[39m[22m
+[90mC:\Users\jgarc\.pm2\logs\cndes-calendar-local-out.log last 100 lines:[39m
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (8) from server\.env -- tip: ÔÜÖ´©Å  specify custom .env file path with { path: '/custom/path/.env' }
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (8) from server\.env -- tip: ­ƒñû agentic secret storage: https://dotenvx.com/as2
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (8) from server\.env -- tip: ÔÜÖ´©Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[AIService] Starting Pure AI extraction for: D:\Proyectos de Programacion\cndes-calendar\server\uploads\1773313817465-AGENDA CNDES-6-3-26.pdf
+[32m1|cndes-ca | [39mWarning: Setting up fake worker.
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39m[AIService] Calling AI via Gemini Direct (Fallback) using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Starting Pure AI extraction for: D:\Proyectos de Programacion\cndes-calendar\server\uploads\1773313843079-AGENDA CNDES-9-3-26.pdf
+[32m1|cndes-ca | [39mWarning: Setting up fake worker.
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39m[AIService] Calling AI via Gemini Direct (Fallback) using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (8) from server\.env -- tip: ­ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (10) from server\.env -- tip: ­ƒøá´©Å  run anywhere with `dotenvx run -- yourcommand`
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[AIService] Starting Pure AI extraction for: D:\Proyectos de Programacion\cndes-calendar\server\uploads\1773314071550-AGENDA CNDES-9-3-26.pdf
+[32m1|cndes-ca | [39mWarning: Setting up fake worker.
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39m[AIService] Extracted text length: 1878 characters.
+[32m1|cndes-ca | [39m[AIService] First 100 chars:                             
+   REP├ÜBLICA DE GUINEA ECUATORIAL                                      
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (10) from server\.env -- tip: ÔÜÖ´©Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (10) from server\.env -- tip: ­ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[AIService] Starting Pure AI extraction for: D:\Proyectos de Programacion\cndes-calendar\server\uploads\1773314408220-AGENDA CNDES-6-3-26.pdf
+[32m1|cndes-ca | [39mWarning: Setting up fake worker.
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39m[AIService] Extracted text length: 2355 characters.
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (10) from server\.env -- tip: ÔÜÖ´©Å  suppress all logs with { quiet: true }
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (10) from server\.env -- tip: ÔÜÖ´©Å  override existing env vars with { override: true }
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (10) from server\.env -- tip: ÔÜÖ´©Å  write to custom object with { processEnv: myObject }
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (10) from server\.env -- tip: ÔÜÖ´©Å  write to custom object with { processEnv: myObject }
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[AIService] Starting Pure AI extraction for: D:\Proyectos de Programacion\cndes-calendar\server\uploads\1773314887741-AGENDA CNDES-6-3-26.pdf
+[32m1|cndes-ca | [39mWarning: Setting up fake worker.
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39m[AIService] Extracted text length: 2355 characters.
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Starting Pure AI extraction for: D:\Proyectos de Programacion\cndes-calendar\server\uploads\1773315036831-AGENDA CNDES-4-3-26.pdf
+[32m1|cndes-ca | [39mWarning: Setting up fake worker.
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39m[AIService] Extracted text length: 1461 characters.
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[dotenv@17.3.1] injecting env (10) from server\.env -- tip: ÔÜÖ´©Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[32m1|cndes-ca | [39mServer running on port 3001
+[32m1|cndes-ca | [39m[AIService] Starting Pure AI extraction for: D:\Proyectos de Programacion\cndes-calendar\server\uploads\1773315428124-AGENDA CNDES-4-3-26.pdf
+[32m1|cndes-ca | [39mWarning: Setting up fake worker.
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39m[AIService] Extracted text length: 1461 characters.
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: meta-llama/llama-3.3-70b-instruct:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model meta-llama/llama-3.3-70b-instruct:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: mistralai/mistral-small-24b-instruct-2501:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model mistralai/mistral-small-24b-instruct-2501:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: qwen/qwen-2.5-72b-instruct:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model qwen/qwen-2.5-72b-instruct:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: google/gemma-3-12b-it:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-12b-it:free
+[32m1|cndes-ca | [39m[AIService] Starting Pure AI extraction for: D:\Proyectos de Programacion\cndes-calendar\server\uploads\1773315484843-AGENDA CNDES-5-3-26.pdf
+[32m1|cndes-ca | [39mWarning: Setting up fake worker.
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39mWarning: TT: undefined function: 21
+[32m1|cndes-ca | [39m[AIService] Extracted text length: 1655 characters.
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: meta-llama/llama-3.3-70b-instruct:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model meta-llama/llama-3.3-70b-instruct:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-27b-it:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: mistralai/mistral-small-24b-instruct-2501:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model mistralai/mistral-small-24b-instruct-2501:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: qwen/qwen-2.5-72b-instruct:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model qwen/qwen-2.5-72b-instruct:free
+[32m1|cndes-ca | [39m[AIService] Attempting extraction with model: google/gemma-3-12b-it:free
+[32m1|cndes-ca | [39m[AIService] Calling AI via OpenRouter using model google/gemma-3-12b-it:free
+
+[90mC:\Users\jgarc\.pm2\logs\cndes-calendar-local-error.log last 100 lines:[39m
+[31m1|cndes-ca | [39m  "error": {
+[31m1|cndes-ca | [39m    "message": "Provider returned error",
+[31m1|cndes-ca | [39m    "code": 400,
+[31m1|cndes-ca | [39m    "metadata": {
+[31m1|cndes-ca | [39m      "raw": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Developer instruction is not enabled for models/gemma-3-12b-it\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n",
+[31m1|cndes-ca | [39m      "provider_name": "Google AI Studio",
+[31m1|cndes-ca | [39m      "is_byok": false
+[31m1|cndes-ca | [39m    }
+[31m1|cndes-ca | [39m  },
+[31m1|cndes-ca | [39m  "user_id": "user_3Ana3Qcs00wsxCurZDSbhfmQmlO"
+[31m1|cndes-ca | [39m}
+[31m1|cndes-ca | [39m[AIService] Error with google/gemma-3-12b-it:free: Provider returned error (Status: 400)
+[31m1|cndes-ca | [39m[AIService] Global Error: Error: Provider returned error (Status: 400)
+[31m1|cndes-ca | [39m    at AIService.callAI (D:\Proyectos de Programacion\cndes-calendar\server\ai.service.js:155:23)
+[31m1|cndes-ca | [39m    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[31m1|cndes-ca | [39m    at async AIService.processDocument (D:\Proyectos de Programacion\cndes-calendar\server\ai.service.js:57:28)
+[31m1|cndes-ca | [39m    at async D:\Proyectos de Programacion\cndes-calendar\server\index.js:236:28
+[31m1|cndes-ca | [39mAI Processing error: Error: Provider returned error (Status: 400)
+[31m1|cndes-ca | [39m    at AIService.callAI (D:\Proyectos de Programacion\cndes-calendar\server\ai.service.js:155:23)
+[31m1|cndes-ca | [39m    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[31m1|cndes-ca | [39m    at async AIService.processDocument (D:\Proyectos de Programacion\cndes-calendar\server\ai.service.js:57:28)
+[31m1|cndes-ca | [39m    at async D:\Proyectos de Programacion\cndes-calendar\server\index.js:236:28
+[31m1|cndes-ca | [39m[AIService] OpenRouter Error Body: {
+[31m1|cndes-ca | [39m  "error": {
+[31m1|cndes-ca | [39m    "message": "Provider returned error",
+[31m1|cndes-ca | [39m    "code": 400,
+[31m1|cndes-ca | [39m    "metadata": {
+[31m1|cndes-ca | [39m      "raw": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Developer instruction is not enabled for models/gemma-3-27b-it\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n",
+[31m1|cndes-ca | [39m      "provider_name": "Google AI Studio",
+[31m1|cndes-ca | [39m      "is_byok": false
+[31m1|cndes-ca | [39m    }
+[31m1|cndes-ca | [39m  },
+[31m1|cndes-ca | [39m  "user_id": "user_3Ana3Qcs00wsxCurZDSbhfmQmlO"
+[31m1|cndes-ca | [39m}
+[31m1|cndes-ca | [39m[AIService] Error with google/gemma-3-27b-it:free: Provider returned error (Status: 400)
+[31m1|cndes-ca | [39m[AIService] OpenRouter Error Body: {
+[31m1|cndes-ca | [39m  "error": {
+[31m1|cndes-ca | [39m    "message": "Provider returned error",
+[31m1|cndes-ca | [39m    "code": 429,
+[31m1|cndes-ca | [39m    "metadata": {
+[31m1|cndes-ca | [39m      "raw": "meta-llama/llama-3.3-70b-instruct:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations",
+[31m1|cndes-ca | [39m      "provider_name": "Venice",
+[31m1|cndes-ca | [39m      "is_byok": false
+[31m1|cndes-ca | [39m    }
+[31m1|cndes-ca | [39m  },
+[31m1|cndes-ca | [39m  "user_id": "user_3Ana3Qcs00wsxCurZDSbhfmQmlO"
+[31m1|cndes-ca | [39m}
+[31m1|cndes-ca | [39m[AIService] 429 Rate Limit on meta-llama/llama-3.3-70b-instruct:free. Switching to next model...
+[31m1|cndes-ca | [39m[AIService] OpenRouter Error Body: {
+[31m1|cndes-ca | [39m  "error": {
+[31m1|cndes-ca | [39m    "message": "Provider returned error",
+[31m1|cndes-ca | [39m    "code": 400,
+[31m1|cndes-ca | [39m    "metadata": {
+[31m1|cndes-ca | [39m      "raw": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Developer instruction is not enabled for models/gemma-3-27b-it\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n",
+[31m1|cndes-ca | [39m      "provider_name": "Google AI Studio",
+[31m1|cndes-ca | [39m      "is_byok": false
+[31m1|cndes-ca | [39m    }
+[31m1|cndes-ca | [39m  },
+[31m1|cndes-ca | [39m  "user_id": "user_3Ana3Qcs00wsxCurZDSbhfmQmlO"
+[31m1|cndes-ca | [39m}
+[31m1|cndes-ca | [39m[AIService] Error with google/gemma-3-27b-it:free: Provider returned error (Status: 400)
+[31m1|cndes-ca | [39m[AIService] OpenRouter Error Body: {
+[31m1|cndes-ca | [39m  "error": {
+[31m1|cndes-ca | [39m    "message": "No endpoints found for mistralai/mistral-small-24b-instruct-2501:free.",
+[31m1|cndes-ca | [39m    "code": 404
+[31m1|cndes-ca | [39m  },
+[31m1|cndes-ca | [39m  "user_id": "user_3Ana3Qcs00wsxCurZDSbhfmQmlO"
+[31m1|cndes-ca | [39m}
+[31m1|cndes-ca | [39m[AIService] Error with mistralai/mistral-small-24b-instruct-2501:free: No endpoints found for mistralai/mistral-small-24b-instruct-2501:free. (Status: 404)
+[31m1|cndes-ca | [39m[AIService] OpenRouter Error Body: {
+[31m1|cndes-ca | [39m  "error": {
+[31m1|cndes-ca | [39m    "message": "No endpoints found for qwen/qwen-2.5-72b-instruct:free.",
+[31m1|cndes-ca | [39m    "code": 404
+[31m1|cndes-ca | [39m  },
+[31m1|cndes-ca | [39m  "user_id": "user_3Ana3Qcs00wsxCurZDSbhfmQmlO"
+[31m1|cndes-ca | [39m}
+[31m1|cndes-ca | [39m[AIService] Error with qwen/qwen-2.5-72b-instruct:free: No endpoints found for qwen/qwen-2.5-72b-instruct:free. (Status: 404)
+[31m1|cndes-ca | [39m[AIService] OpenRouter Error Body: {
+[31m1|cndes-ca | [39m  "error": {
+[31m1|cndes-ca | [39m    "message": "Provider returned error",
+[31m1|cndes-ca | [39m    "code": 400,
+[31m1|cndes-ca | [39m    "metadata": {
+[31m1|cndes-ca | [39m      "raw": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Developer instruction is not enabled for models/gemma-3-12b-it\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n",
+[31m1|cndes-ca | [39m      "provider_name": "Google AI Studio",
+[31m1|cndes-ca | [39m      "is_byok": false
+[31m1|cndes-ca | [39m    }
+[31m1|cndes-ca | [39m  },
+[31m1|cndes-ca | [39m  "user_id": "user_3Ana3Qcs00wsxCurZDSbhfmQmlO"
+[31m1|cndes-ca | [39m}
+[31m1|cndes-ca | [39m[AIService] Error with google/gemma-3-12b-it:free: Provider returned error (Status: 400)
+[31m1|cndes-ca | [39m[AIService] Global Error: Error: Provider returned error (Status: 400)
+[31m1|cndes-ca | [39m    at AIService.callAI (D:\Proyectos de Programacion\cndes-calendar\server\ai.service.js:155:23)
+[31m1|cndes-ca | [39m    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[31m1|cndes-ca | [39m    at async AIService.processDocument (D:\Proyectos de Programacion\cndes-calendar\server\ai.service.js:57:28)
+[31m1|cndes-ca | [39m    at async D:\Proyectos de Programacion\cndes-calendar\server\index.js:236:28
+[31m1|cndes-ca | [39mAI Processing error: Error: Provider returned error (Status: 400)
+[31m1|cndes-ca | [39m    at AIService.callAI (D:\Proyectos de Programacion\cndes-calendar\server\ai.service.js:155:23)
+[31m1|cndes-ca | [39m    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[31m1|cndes-ca | [39m    at async AIService.processDocument (D:\Proyectos de Programacion\cndes-calendar\server\ai.service.js:57:28)
+[31m1|cndes-ca | [39m    at async D:\Proyectos de Programacion\cndes-calendar\server\index.js:236:28
+

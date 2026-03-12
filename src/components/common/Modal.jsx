@@ -1,39 +1,41 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
 const Modal = ({ isOpen, onClose, title, children }) => {
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            backdropFilter: 'blur(4px)',
-            animation: 'fadeIn 0.2s ease-out'
-        }}>
-            <div className="card animate-in zoom-in-95 duration-200" style={{
-                width: '90%',
-                maxWidth: '600px',
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: 'var(--shadow-xl)',
-                border: '1px solid rgba(255,255,255,0.1)'
-            }}>
-                <div className="flex items-center justify-between" style={{ padding: '1.25rem', borderBottom: '1px solid var(--color-border)' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>{title}</h3>
-                    <button onClick={onClose} className="btn btn-ghost" style={{ padding: '0.25rem' }}><X size={24} /></button>
+        <div className="modal-blur animate-fadeIn" onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-[2rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.3)] border border-slate-100 overflow-hidden animate-zoomIn">
+                {/* Header Container */}
+                <div className="flex items-center justify-between px-8 py-6 border-b border-slate-50 bg-white/50 backdrop-blur-sm sticky top-0 z-50">
+                    <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">
+                        {title}
+                    </h2>
+                    <button 
+                        onClick={onClose} 
+                        className="p-2.5 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-red-500 transition-all active:scale-90 group"
+                    >
+                        <X size={22} strokeWidth={2.5} />
+                    </button>
                 </div>
-                <div style={{ padding: '1.5rem' }}>
+
+                {/* Content Area */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gradient-to-b from-white to-slate-50/30">
                     {children}
                 </div>
             </div>
         </div>
     );
 };
+
 export default Modal;

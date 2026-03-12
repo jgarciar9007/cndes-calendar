@@ -237,7 +237,10 @@ app.post('/api/ai/process-document', async (req, res) => {
         res.json(activities);
     } catch (error) {
         console.error("AI Processing error:", error);
-        res.status(500).json({ error: 'Failed to process document with AI' });
+        res.status(500).json({ 
+            error: error.message || 'Error interno al procesar el documento.',
+            details: error.toString()
+        });
     }
 });
 

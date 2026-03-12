@@ -1,22 +1,23 @@
 import React from 'react';
 import { DndContext, useDraggable, useDroppable, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isSameDay } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { useCalendar } from '../../context/CalendarContext';
 import { useAuth } from '../../context/AuthContext';
 
 const DraggableEvent = ({ event, isAdmin, onClick }) => {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: event.id,
-        disabled: !isAdmin, // Only admin can drag
+        disabled: !isAdmin,
         data: { event }
     });
 
     const style = transform ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
         zIndex: 1000,
-        opacity: 0.9,
+        opacity: 0.8,
         cursor: 'grabbing',
-        pointerEvents: 'none' // let clicks pass through during drag
+        pointerEvents: 'none'
     } : undefined;
 
     return (
@@ -25,30 +26,19 @@ const DraggableEvent = ({ event, isAdmin, onClick }) => {
             style={style}
             {...listeners}
             {...attributes}
-            className="event-item"
+            className="relative mb-1 group/event"
             onClick={(e) => {
-                // Prevent drag click from firing if we just wanted to select
-                // But dnd-kit handles separation usually.
-                e.stopPropagation(); // Stop bubbling to day cell
+                e.stopPropagation();
                 if (onClick) onClick(event);
             }}
         >
-            <div style={{
-                fontSize: '0.75rem',
-                backgroundColor: isDragging ? 'var(--color-secondary)' : 'rgba(56, 189, 248, 0.1)',
-                color: isDragging ? 'white' : 'var(--color-primary)',
-                padding: '2px 4px',
-                borderRadius: '4px',
-                borderLeft: isDragging ? 'none' : '2px solid var(--color-primary)',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                marginBottom: '2px',
-                cursor: isAdmin ? 'pointer' : 'default', // Changed to pointer for click
-                boxShadow: isDragging ? 'var(--shadow-lg)' : 'none',
-                position: 'relative'
-            }}>
-                {format(new Date(event.start), 'HH:mm')} {event.title}
+            <div className={`px-2 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-black leading-tight border transition-all truncate hover:shadow-md ${
+                isDragging 
+                    ? 'bg-primary-600 text-white border-transparent' 
+                    : 'bg-white text-slate-700 border-slate-100 group-hover/event:border-primary-600/30 group-hover/event:bg-primary-50 group-hover/event:text-primary-800 shadow-sm'
+            }`}>
+                <span className="opacity-50 font-bold mr-1">{format(new Date(event.start), 'HH:mm')}</span>
+                {event.title}
             </div>
         </div>
     );
@@ -61,55 +51,29 @@ const DroppableDay = ({ day, events, isCurrentMonth, onClick, isAdmin, onEventCl
     });
 
     const isToday = isSameDay(day, new Date());
-
-    // We can show fewer events to ensure they fit cleanly
-    const MAX_VISIBLE_EVENTS = 3;
+    const MAX_VISIBLE_EVENTS = 4;
 
     return (
         <div
             ref={setNodeRef}
-            style={{
-                backgroundColor: isOver ? '#f0f9ff' : (isToday ? 'rgba(59, 130, 246, 0.05)' : 'var(--color-surface)'),
-                boxShadow: isToday ? 'inset 0 0 0 2px #3b82f6' : 'none',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                opacity: isCurrentMonth ? 1 : 0.4,
-                border: isOver ? '2px dashed var(--color-secondary)' : 'none',
-                transition: 'all 0.2s',
-                overflow: 'hidden',
-                position: 'relative',
-                cursor: 'pointer'
-            }}
-            onClick={(e) => {
-                e.stopPropagation();
-                onClick();
-            }}
-            className="calendar-day-cell"
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            className={`relative min-h-[140px] flex flex-col transition-all duration-300 border-r border-b border-slate-100/60 overflow-hidden cursor-pointer ${
+                !isCurrentMonth ? 'bg-slate-50 opacity-40' : 'bg-white'
+            } ${isOver ? 'bg-primary-50/50 ring-2 ring-primary-500 ring-inset z-10' : ''} ${isToday ? 'bg-primary-50/10' : ''}`}
         >
-            <div style={{
-                padding: '0.5rem',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center'
-            }}>
-                <div style={{
-                    width: '28px',
-                    height: '28px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    backgroundColor: isToday ? 'var(--color-secondary)' : 'transparent',
-                    color: isToday ? 'white' : 'var(--color-text-light)',
-                    fontWeight: isToday ? '600' : '500',
-                    fontSize: '0.9rem'
-                }}>
+            {/* Day Header */}
+            <div className="flex justify-end p-2.5">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black transition-all ${
+                    isToday 
+                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/20' 
+                        : isCurrentMonth ? 'text-slate-400' : 'text-slate-300'
+                }`}>
                     {format(day, 'd')}
                 </div>
             </div>
 
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', padding: '0 4px 4px 4px', overflow: 'hidden' }}>
+            {/* Events List */}
+            <div className="flex-1 px-1.5 sm:px-2.5 pb-2 transition-all">
                 {events.slice(0, MAX_VISIBLE_EVENTS).map(ev => (
                     <DraggableEvent
                         key={ev.id}
@@ -119,15 +83,7 @@ const DroppableDay = ({ day, events, isCurrentMonth, onClick, isAdmin, onEventCl
                     />
                 ))}
                 {events.length > MAX_VISIBLE_EVENTS && (
-                    <div style={{
-                        fontSize: '0.7rem',
-                        color: 'var(--color-text-light)',
-                        textAlign: 'center',
-                        padding: '2px',
-                        backgroundColor: 'rgba(241, 245, 249, 0.8)',
-                        borderRadius: '4px',
-                        marginTop: 'auto'
-                    }}>
+                    <div className="mt-1 text-[9px] font-black text-slate-400 bg-slate-50 border border-slate-100 py-1 rounded-lg text-center uppercase tracking-widest hover:bg-slate-100 hover:text-slate-600 transition-colors">
                         + {events.length - MAX_VISIBLE_EVENTS} más
                     </div>
                 )}
@@ -139,7 +95,6 @@ const DroppableDay = ({ day, events, isCurrentMonth, onClick, isAdmin, onEventCl
 const CalendarGrid = ({ onEventClick }) => {
     const { currentDate, events, setCurrentDate, setView, moveEvent } = useCalendar();
     const { user } = useAuth();
-
     const isAdmin = user && user.role === 'admin';
 
     const monthStart = startOfMonth(currentDate);
@@ -158,7 +113,6 @@ const CalendarGrid = ({ onEventClick }) => {
     const handleDragEnd = (event) => {
         const { active, over } = event;
         if (over && active.id !== over.id) {
-            // active.id is event ID. over.id is day ISO string
             const newDate = new Date(over.id);
             if (!isNaN(newDate.getTime())) {
                 moveEvent(active.id, newDate);
@@ -168,46 +122,24 @@ const CalendarGrid = ({ onEventClick }) => {
 
     return (
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <div className="calendar-grid-container" style={{ height: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column' }}>
-                {/* Header */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(7, 1fr)',
-                    backgroundColor: 'var(--color-surface)',
-                    borderBottom: '1px solid var(--color-border)',
-                    flexShrink: 0
-                }}>
+            <div className="flex flex-col w-full h-full bg-slate-200/40">
+                {/* Weekday Labels Header */}
+                <div className="grid grid-cols-7 bg-white/50 backdrop-blur-sm border-b border-slate-200/50 sticky top-0 z-30">
                     {weekDays.map(d => (
-                        <div key={d} style={{
-                            padding: '1rem',
-                            textAlign: 'center',
-                            fontWeight: '600',
-                            fontSize: '0.875rem',
-                            color: 'var(--color-text-light)',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em'
-                        }}>
-                            {d}
+                        <div key={d} className="py-5 text-center">
+                            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+                                <span className="hidden sm:inline">{d}</span>
+                                <span className="sm:hidden">{d.slice(0, 3)}</span>
+                            </span>
                         </div>
                     ))}
                 </div>
 
-                {/* Days Grid */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(7, 1fr)',
-                    gridTemplateRows: 'repeat(6, 1fr)',
-                    flexGrow: 1,
-                    backgroundColor: 'var(--color-border)',
-                    gap: '1px',
-                    border: '1px solid var(--color-border)',
-                    overflow: 'hidden'
-                }}>
+                {/* Grid Body */}
+                <div className="grid grid-cols-7 bg-slate-100/20 flex-1 relative ring-1 ring-slate-200/50">
                     {cellDays.map(day => {
                         const dayEvents = events.filter(e => isSameDay(new Date(e.start), day));
-                        // Sort events by time
                         dayEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
-
                         const isCurrentMonth = isSameMonth(day, monthStart);
 
                         return (
@@ -227,4 +159,5 @@ const CalendarGrid = ({ onEventClick }) => {
         </DndContext>
     );
 };
+
 export default CalendarGrid;
