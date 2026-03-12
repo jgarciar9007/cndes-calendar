@@ -205,12 +205,32 @@ app.post('/api/ai/process-document', async (req, res) => {
             return res.status(400).json({ error: 'Missing filePath' });
         }
 
-        // Security: Ensure filePath is within the uploads directory
-        const absolutePath = path.resolve(__dirname, filePath.startsWith('uploads') ? filePath : path.join('uploads', path.basename(filePath)));
+        // Security & Resolution: Ensure filePath is within the uploads directory
+        // Handle both relative paths, absolute paths and URLs (/uploads/...)
         const uploadsDir = path.join(__dirname, 'uploads');
+        let relativePath = filePath;
+        
+        if (filePath.includes('uploads')) {
+            // Strip everything before 'uploads' to get a relative path we can trust
+            const parts = filePath.split(path.sep === '/' ? '/' : /[\\\/]/);
+            const uploadsIndex = parts.indexOf('uploads');
+            if (uploadsIndex !== -1) {
+                relativePath = parts.slice(uploadsIndex + 1).join(path.sep);
+            }
+        } else {
+            relativePath = path.basename(filePath);
+        }
+
+        const absolutePath = path.join(uploadsDir, relativePath);
 
         if (!absolutePath.startsWith(uploadsDir)) {
+            console.error("Access denied to path:", absolutePath, "Uploads dir:", uploadsDir);
             return res.status(403).json({ error: 'Access denied' });
+        }
+
+        if (!fs.existsSync(absolutePath)) {
+            console.error("File not found for AI processing:", absolutePath);
+            return res.status(404).json({ error: 'File not found' });
         }
 
         const activities = await aiService.processDocument(absolutePath, mimeType);

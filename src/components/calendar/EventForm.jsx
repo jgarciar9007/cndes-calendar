@@ -114,7 +114,7 @@ const EventForm = ({ onClose, initialEvent = null }) => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    filePath: lastFile.data, // This is the /uploads/ path
+                    filePath: lastFile.path || lastFile.data, // Prioritize disk path over URL
                     mimeType: lastFile.type
                 })
             });

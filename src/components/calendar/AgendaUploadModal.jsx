@@ -43,7 +43,7 @@ const AgendaUploadModal = ({ onClose }) => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    filePath: uploadedFileData.data,
+                    filePath: uploadedFileData.path || uploadedFileData.data,
                     mimeType: uploadedFileData.type
                 })
             });
