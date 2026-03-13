@@ -29,7 +29,7 @@ const Layout = ({ children }) => {
                         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">CNDES Agenda Oficial</span>
                     </div>
                     <div className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">
-                        © {new Date().getFullYear()} Centro Nacional de Desarrollo Estratégico
+                        @2026 Departamento de Informática CNDES
                     </div>
                 </div>
             </footer>
