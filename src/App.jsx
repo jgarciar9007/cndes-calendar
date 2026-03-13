@@ -7,20 +7,24 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 
 function App() {
-  return (
-    <AuthProvider>
-      <CalendarProvider>
-        <Router>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-            </Routes>
-          </Layout>
-        </Router>
-      </CalendarProvider>
-    </AuthProvider>
-  );
+    return (
+        <AuthProvider>
+            <CalendarProvider>
+                <Router>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="*" element={
+                            <Layout>
+                                <Routes>
+                                    <Route path="/" element={<Home />} />
+                                </Routes>
+                            </Layout>
+                        } />
+                    </Routes>
+                </Router>
+            </CalendarProvider>
+        </AuthProvider>
+    );
 }
 
 export default App;
