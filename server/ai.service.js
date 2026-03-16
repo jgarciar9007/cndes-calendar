@@ -15,7 +15,8 @@ class AIService {
             "google/gemini-2.0-flash-exp:free",
             "meta-llama/llama-3.3-70b-instruct:free",
             "google/gemma-3-27b-it:free",
-            "google/gemma-3-12b-it:free"
+            "google/gemma-3-12b-it:free",
+            "mistralai/mistral-7b-instruct:free"
         ];
         
         if (process.env.OPENROUTER_MODEL) {
@@ -213,6 +214,8 @@ class AIService {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${this.openRouterKey}`,
+                        "HTTP-Referer": "https://cndes-calendar.local",
+                        "X-Title": "CNDES AI Assistant",
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
@@ -257,6 +260,12 @@ class AIService {
                 results = await db.queryAsLector(generatedSQL);
             }
             console.log(`[AIService] DB returned ${results.length} rows.`);
+            
+            // Cap results to avoid blowing up the prompt (approx 10 events max)
+            if (results.length > 20) {
+                console.warn("[AIService] Results too large, capping to 20 for AI interpretation.");
+                results = results.slice(0, 20);
+            }
         } catch (err) {
             console.error("[AIService] SQL Execution Error:", err, "SQL:", generatedSQL);
             return `Lo siento, hubo un error técnico al consultar la base de datos. (Error: ${err.message})`;
@@ -288,6 +297,8 @@ class AIService {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${this.openRouterKey}`,
+                        "HTTP-Referer": "https://cndes-calendar.local",
+                        "X-Title": "CNDES AI Assistant",
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
@@ -297,12 +308,16 @@ class AIService {
                     })
                 });
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                if (!response.ok) {
+                    const errBody = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errBody.substring(0, 100)}`);
+                }
 
                 const data = await response.json();
-                return data.choices?.[0]?.message?.content || "No se encontró registro de esa información en el sistema.";
+                const content = data.choices?.[0]?.message?.content;
+                if (content) return content;
             } catch (err) {
-                console.warn(`[AIService] Interpretation failed with model ${model}: ${err.message}`);
+                console.error(`[AIService] Interpretation failed with model ${model}:`, err.message);
             }
         }
 
