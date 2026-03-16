@@ -11,16 +11,19 @@ class AIService {
         this.openRouterKey = process.env.OPENROUTER_API_KEY || "";
         
         // Waterfall logic for maximum reliability with free models
-        this.modelWaterfall = [
-            "google/gemini-2.0-flash-exp:free",
+        const defaultModels = [
+            "google/gemini-2.0-flash:free",
+            "google/gemini-2.0-flash-lite:free",
             "meta-llama/llama-3.3-70b-instruct:free",
             "google/gemma-3-27b-it:free",
-            "google/gemma-3-12b-it:free",
             "mistralai/mistral-7b-instruct:free"
         ];
         
-        if (process.env.OPENROUTER_MODEL) {
-            this.modelWaterfall.unshift(process.env.OPENROUTER_MODEL);
+        const envModel = process.env.OPENROUTER_MODEL;
+        if (envModel && typeof envModel === 'string' && envModel.trim() !== '') {
+            this.modelWaterfall = [envModel.trim(), ...defaultModels];
+        } else {
+            this.modelWaterfall = defaultModels;
         }
     }
 
@@ -155,9 +158,14 @@ class AIService {
         
         // 0. Quick Greeting/Smalltalk check
         const lowers = userQuestion.toLowerCase().trim();
-        const greetingRegex = /^(hola|buenos d.as|buenas tardes|buenas noches|saludos|hey|quien eres|que haces)/i;
+        const greetingRegex = /^(hola|buenos d.as|buenas tardes|buenas noches|saludos|hey|quien eres|que haces|como te va|como estas|quien eres)/i;
         if (greetingRegex.test(lowers)) {
-            return "¡Hola! Soy el **Asistente de Consulta de Datos Lector**. Estoy a tu disposición para consultar la base de datos de la Agenda CNDES (eventos, participantes, ubicaciones, etc.). ¿En qué puedo ayudarte hoy?";
+            return "¡Hola! Soy el **Asistente de Agenda CNDES**. Estoy aquí para ayudarte a consultar información sobre las actividades planificadas, eventos y reuniones del CNDES. ¿En qué puedo ayudarte hoy?";
+        }
+        
+        // Handle direct help questions
+        if (lowers.includes("ayuda") || lowers.includes("que puedes hacer") || lowers.includes("funciona")) {
+            return "Soy tu asistente para la **Agenda CNDES**. Puedes preguntarme cosas como:\n- *¿Qué reuniones hay hoy?*\n- *¿Cuándo es el próximo evento en la Sala de Plenos?*\n- *Lista las actividades de la próxima semana.*\n¡Estoy para ayudarte!";
         }
 
         // 1. Generate SQL
@@ -250,8 +258,8 @@ class AIService {
         // 2. Execute SQL
         let results = [];
         try {
-        if (generatedSQL.toUpperCase().includes('CONVERSATIONAL')) {
-                // Handled in step 3 as a general response
+            if (generatedSQL.toUpperCase().includes('CONVERSATIONAL')) {
+                return "¡Hola! Soy el **Asistente de Agenda CNDES**. Estoy listo para buscar cualquier actividad o evento que necesites consultar en el sistema. ¿Qué estás buscando?";
             } else if (generatedSQL.toUpperCase().includes('NOT_FOUND') || !generatedSQL.toUpperCase().includes('SELECT')) {
                 results = [];
                 console.log("[AIService] SQL Generator returned NOT_FOUND or invalid SELECT.");
@@ -273,21 +281,19 @@ class AIService {
 
         // 3. Interpret Results with Waterfall
         const personaPrompt = `
-        ROL: Eres el "Asistente de Consulta de Datos Lector". Tu propósito es servir como interfaz de lenguaje natural para la base de datos PostgreSQL.
-        CONTEXTO OPERATIVO: Operas bajo el usuario lector, solo lectura.
+        ROL: Eres el **Asistente de Agenda CNDES**. Tu propósito es ayudar a los usuarios con información sobre las actividades planificadas del CNDES.
         
         REGLAS CRÍTICAS DE RESPUESTA:
-        1. Si los datos están presentes, explícalos de forma profesional.
-        2. Si la consulta era 'CONVERSATIONAL', simplemente saluda y pregunta en qué puedes ayudar con los datos.
-        3. Si la lista de datos está vacía, responde: "No se encontró registro de esa información en el sistema".
-        4. Seguridad y Privacidad: Nunca sugieras ni intentes ejecutar comandos que alteren tablas.
-        5. Formato: Usa tablas de Markdown para listas de eventos o personas.
-        6. No alucines nombres o fechas.
+        1. Enfócate ÚNICAMENTE en proporcionar información clara sobre eventos, reuniones y actividades.
+        2. NO menciones que realizas consultas a una base de datos PostgreSQL, SQL o términos técnicos del servidor.
+        3. Si los datos están presentes, preséntalos de forma profesional y organizada.
+        4. Si la lista de datos está vacía, responde EXACTAMENTE: "No se encontró registro de esa información en el sistema".
+        5. Formato: Usa tablas de Markdown para listas de múltiples actividades.
+        6. Sé directo y amable. No inventes detalles que no estén en los datos proporcionados.
 
-        PREGUNTA ORIGINAL: "${userQuestion}"
-        DATOS OBTENIDOS (JSON): ${JSON.stringify(results)}
-        TIPO DE CONSULTA: ${generatedSQL.includes('CONVERSATIONAL') ? 'Conversacional' : 'Búsqueda de Datos'}
-
+        PREGUNTA DEL USUARIO: "${userQuestion}"
+        DATOS DE ACTIVIDADES (JSON): ${JSON.stringify(results)}
+        
         RESPUESTA PROFESIONAL:`;
 
         for (const model of this.modelWaterfall) {

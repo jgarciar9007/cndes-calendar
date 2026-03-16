@@ -37,12 +37,17 @@ const LectorAssistant = () => {
                 body: JSON.stringify({ question: userMessage })
             });
 
-            if (!response.ok) throw new Error('Error en la comunicación con el servidor');
-
             const data = await response.json();
+
+            if (!response.ok) {
+                const errorMsg = data.error || 'Error en la comunicación';
+                const errorDetails = data.details ? ` (${data.details})` : '';
+                throw new Error(errorMsg + errorDetails);
+            }
+
             setMessages(prev => [...prev, { role: 'bot', content: data.answer }]);
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'bot', content: `⚠️ Error: ${error.message}` }]);
+            setMessages(prev => [...prev, { role: 'bot', content: `⚠️ **Error del Sistema:** ${error.message}` }]);
         } finally {
             setIsLoading(false);
         }

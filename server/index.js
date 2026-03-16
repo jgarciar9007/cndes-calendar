@@ -247,19 +247,19 @@ app.post('/api/ai/process-document', async (req, res) => {
 app.post('/api/ai/query', async (req, res) => {
     try {
         const { question } = req.body;
-        console.log(`[LectorAPI] Received question: "${question}"`);
+        console.log(`[LectorAPI] Question: ${question}`);
         if (!question) {
-            return res.status(400).json({ error: 'Falta la pregunta del usuario.' });
+            return res.status(400).json({ error: 'Falta la pregunta.' });
         }
 
         const answer = await aiService.askLector(question);
-        console.log(`[LectorAPI] Sending answer preview: "${answer.substring(0, 50)}..."`);
         res.json({ answer });
     } catch (error) {
-        console.error("Lector Assistant Error:", error);
+        console.error("CRITICAL Lector Assistant Error:", error);
         res.status(500).json({ 
-            error: error.message || 'Error interno en el Asistente Lector.',
-            details: error.toString()
+            error: error.message || 'Error interno.',
+            details: error.toString(),
+            stack: error.stack
         });
     }
 });
