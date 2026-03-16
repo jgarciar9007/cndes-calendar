@@ -8,24 +8,18 @@ const pdf = require("pdf-parse");
  */
 class AIService {
     constructor() {
-        this.openRouterKey = process.env.OPENROUTER_API_KEY || "";
+        this.openRouterKey = (process.env.OPENROUTER_API_KEY || "").trim();
         
-        // Priority models for the new API key
-        const defaultModels = [
+        // Waterfall with high-reliability free models
+        this.modelWaterfall = [
+            "google/gemini-2.0-flash-exp:free",
             "google/gemini-2.0-flash:free",
-            "google/gemini-2.0-flash-lite:free",
             "meta-llama/llama-3.3-70b-instruct:free",
-            "google/gemma-3-27b-it:free",
-            "mistralai/pixtral-12b:free",
+            "google/gemma-2-9b-it:free",
             "mistralai/mistral-7b-instruct:free"
         ];
         
-        const envModel = process.env.OPENROUTER_MODEL;
-        if (envModel && typeof envModel === 'string' && envModel.trim() !== '') {
-            this.modelWaterfall = [envModel.trim(), ...defaultModels];
-        } else {
-            this.modelWaterfall = defaultModels;
-        }
+        console.log("[AIService] Waterfall initialized with key:", this.openRouterKey ? "PRESENT (ends in " + this.openRouterKey.slice(-4) + ")" : "MISSING");
     }
 
     async processDocument(filePath, mimeType) {
@@ -225,7 +219,11 @@ class AIService {
                     })
                 });
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`[AIService] OpenRouter Error (${response.status}) for ${model}:`, errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 50)}`);
+                }
                 
                 const data = await response.json();
                 generatedSQL = data.choices?.[0]?.message?.content?.trim() || "";
@@ -308,7 +306,8 @@ class AIService {
 
                 if (!response.ok) {
                     const errBody = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errBody.substring(0, 100)}`);
+                    console.error(`[AIService] Interpretation Error (${response.status}) for ${model}:`, errBody);
+                    throw new Error(`HTTP ${response.status}: ${errBody.substring(0, 50)}`);
                 }
 
                 const data = await response.json();
