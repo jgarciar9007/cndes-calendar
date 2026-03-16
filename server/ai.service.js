@@ -152,6 +152,13 @@ class AIService {
 
         const db = require('./db');
         
+        // 0. Quick Greeting/Smalltalk check
+        const lowers = userQuestion.toLowerCase().trim();
+        const greetingRegex = /^(hola|buenos d.as|buenas tardes|buenas noches|saludos|hey|quien eres|que haces)/i;
+        if (greetingRegex.test(lowers)) {
+            return "¡Hola! Soy el **Asistente de Consulta de Datos Lector**. Estoy a tu disposición para consultar la base de datos de la Agenda CNDES (eventos, participantes, ubicaciones, etc.). ¿En qué puedo ayudarte hoy?";
+        }
+
         // 1. Generate SQL
         const now = new Date().toISOString();
         const today = now.split('T')[0];
@@ -168,12 +175,12 @@ class AIService {
         - events (
             id TEXT, 
             title TEXT, 
-            "start" TEXT (Formato ISO: 'YYYY-MM-DDTHH:mm:ss.sssZ'), 
-            "end" TEXT (Formato ISO), 
+            "start" TEXT (ISO: 'YYYY-MM-DDTHH:mm:ss.sssZ'), 
+            "end" TEXT (ISO), 
             location TEXT, 
             description TEXT, 
-            participants TEXT (String JSON que representa un array de nombres, ej: '["Juan", "Maria"]'), 
-            attachments TEXT (String JSON)
+            participants TEXT (JSON string array, ej: '["Juan", "Maria"]'), 
+            attachments TEXT (JSON string array)
           )
         - users (id TEXT, username TEXT, name TEXT, role TEXT)
         - locations (name TEXT)
@@ -181,14 +188,15 @@ class AIService {
 
         REGLAS DE GENERACIÓN SQL:
         1. SOLO consultas SELECT.
-        2. Usa ILIKE para búsquedas de texto parciales y que no dependan de mayúsculas (ej: title ILIKE '%reunión%').
-        3. Para fechas, recuerda que se guardan como TEXTO ISO. 
-           - Para buscar eventos de "hoy": WHERE "start" LIKE '${today}%'
-           - Para eventos en un rango: WHERE "start" >= '2026-03-16T00:00:00.000Z' AND "start" <= '2026-03-16T23:59:59.999Z'
-        4. Para buscar participantes: Dado que es un string JSON, usa: participants ILIKE '%nombre%'
-        5. IMPORTANTE: Ordena siempre por "start" ASC a menos que se pida lo contrario.
-        6. Devuelve ÚNICAMENTE el código SQL plano, sin bloques de código markdown ni explicaciones.
-        7. Si la pregunta es ambigua o no se puede responder, devuelve: SELECT 'NOT_FOUND';
+        2. Búsqueda de texto: Usa ILIKE con comodines (ej: title ILIKE '%palabra%').
+        3. Fechas: Se guardan como STRING ISO. 
+           - Buscar por día exacto: WHERE "start" LIKE 'YYYY-MM-DD%'
+           - Buscar "hoy": WHERE "start" LIKE '${today}%'
+        4. Participantes: Como es un string JSON, busca con: participants ILIKE '%nombre%'
+        5. Orden: Por defecto ORDER BY "start" ASC.
+        6. Devuelve SOLO el SQL plano. Sin markdown.
+        7. Si la pregunta es saludo o charla no-datos, devuelve: SELECT 'CONVERSATIONAL';
+        8. Si no hay forma de consultar lo que pide, devuelve: SELECT 'NOT_FOUND';
 
         PREGUNTA DEL USUARIO: "${userQuestion}"
         
@@ -239,8 +247,12 @@ class AIService {
         // 2. Execute SQL
         let results = [];
         try {
-            if (generatedSQL.toUpperCase().includes('NOT_FOUND')) {
+        if (generatedSQL.toUpperCase().includes('CONVERSATIONAL')) {
+                // Handled in step 3 as a general response
+            } else if (generatedSQL.toUpperCase().includes('NOT_FOUND') || !generatedSQL.toUpperCase().includes('SELECT')) {
                 results = [];
+                console.log("[AIService] SQL Generator returned NOT_FOUND or invalid SELECT.");
+                return "No se encontró registro de esa información en el sistema.";
             } else {
                 results = await db.queryAsLector(generatedSQL);
             }
@@ -256,13 +268,16 @@ class AIService {
         CONTEXTO OPERATIVO: Operas bajo el usuario lector, solo lectura.
         
         REGLAS CRÍTICAS DE RESPUESTA:
-        1. Transparencia de Datos: Si el usuario pregunta algo, busca la información en los datos proporcionados. Si los datos están vacíos o no está coinciden con lo que busca, responde EXACTAMENTE: "No se encontró registro de esa información en el sistema".
-        2. Seguridad y Privacidad: Nunca sugieras ni intentes ejecutar comandos que alteren tablas.
-        3. Formato de Salida: Presenta los datos de forma estructurada. Usa tablas de Markdown para múltiples filas. Muy importante: Sé profesional y técnico.
-        4. No Alucinación: No inventes datos que no aparezcan en el JSON recibido.
+        1. Si los datos están presentes, explícalos de forma profesional.
+        2. Si la consulta era 'CONVERSATIONAL', simplemente saluda y pregunta en qué puedes ayudar con los datos.
+        3. Si la lista de datos está vacía, responde: "No se encontró registro de esa información en el sistema".
+        4. Seguridad y Privacidad: Nunca sugieras ni intentes ejecutar comandos que alteren tablas.
+        5. Formato: Usa tablas de Markdown para listas de eventos o personas.
+        6. No alucines nombres o fechas.
 
         PREGUNTA ORIGINAL: "${userQuestion}"
         DATOS OBTENIDOS (JSON): ${JSON.stringify(results)}
+        TIPO DE CONSULTA: ${generatedSQL.includes('CONVERSATIONAL') ? 'Conversacional' : 'Búsqueda de Datos'}
 
         RESPUESTA PROFESIONAL:`;
 

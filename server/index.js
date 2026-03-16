@@ -247,11 +247,13 @@ app.post('/api/ai/process-document', async (req, res) => {
 app.post('/api/ai/query', async (req, res) => {
     try {
         const { question } = req.body;
+        console.log(`[LectorAPI] Received question: "${question}"`);
         if (!question) {
             return res.status(400).json({ error: 'Falta la pregunta del usuario.' });
         }
 
         const answer = await aiService.askLector(question);
+        console.log(`[LectorAPI] Sending answer preview: "${answer.substring(0, 50)}..."`);
         res.json({ answer });
     } catch (error) {
         console.error("Lector Assistant Error:", error);
