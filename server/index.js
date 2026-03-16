@@ -244,6 +244,24 @@ app.post('/api/ai/process-document', async (req, res) => {
     }
 });
 
+app.post('/api/ai/query', async (req, res) => {
+    try {
+        const { question } = req.body;
+        if (!question) {
+            return res.status(400).json({ error: 'Falta la pregunta del usuario.' });
+        }
+
+        const answer = await aiService.askLector(question);
+        res.json({ answer });
+    } catch (error) {
+        console.error("Lector Assistant Error:", error);
+        res.status(500).json({ 
+            error: error.message || 'Error interno en el Asistente Lector.',
+            details: error.toString()
+        });
+    }
+});
+
 // SPA Fallback
 app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));

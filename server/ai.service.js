@@ -147,6 +147,105 @@ class AIService {
             throw new Error("Formato de respuesta IA inválido.");
         }
     }
+    async askLector(userQuestion) {
+        if (!this.openRouterKey) throw new Error("API Key faltante (OPENROUTER_API_KEY)");
+
+        const db = require('./db');
+        
+        // 1. Generate SQL
+        const sqlPrompt = `
+        Eres un generador de SQL experto para PostgreSQL. 
+        Tu tarea es convertir la pregunta del usuario en una ÚNICA consulta SELECT válida.
+        
+        ESQUEMA DE LA BASE DE DATOS:
+        - events (id TEXT, title TEXT, "start" TEXT, "end" TEXT, location TEXT, description TEXT, participants TEXT (JSON array), attachments TEXT (JSON array))
+        - users (id TEXT, username TEXT, name TEXT, role TEXT)
+        - locations (name TEXT)
+        - participants (name TEXT)
+
+        REGLAS:
+        - SOLO consultas SELECT.
+        - Devuelve ÚNICAMENTE el código SQL, sin explicaciones ni bloques de código markdown.
+        - Si la pregunta no se puede responder con este esquema, devuelve: SELECT 'NOT_FOUND';
+        - No intentes escribir (INSERT/UPDATE/DELETE).
+
+        PREGUNTA DEL USUARIO: "${userQuestion}"
+        
+        SQL:`;
+
+        let generatedSQL = "";
+        try {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${this.openRouterKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: this.modelWaterfall[0],
+                    messages: [{ role: "user", content: sqlPrompt }],
+                    temperature: 0.1
+                })
+            });
+            const data = await response.json();
+            generatedSQL = data.choices?.[0]?.message?.content?.trim() || "SELECT 'NOT_FOUND';";
+            // Clean markdown blocks if any
+            generatedSQL = generatedSQL.replace(/```sql/g, "").replace(/```/g, "").trim();
+            console.log(`[AIService] Generated SQL: ${generatedSQL}`);
+        } catch (err) {
+            console.error("[AIService] SQL Generation Error:", err);
+            throw new Error("Error al generar la consulta técnica.");
+        }
+
+        // 2. Execute SQL
+        let results = [];
+        try {
+            if (generatedSQL.toUpperCase().includes('NOT_FOUND')) {
+                results = [];
+            } else {
+                results = await db.queryAsLector(generatedSQL);
+            }
+        } catch (err) {
+            console.error("[AIService] SQL Execution Error:", err, "SQL:", generatedSQL);
+            return `Lo siento, hubo un error técnico al consultar la base de datos: ${err.message}`;
+        }
+
+        // 3. Interpret Results with the Persona
+        const personaPrompt = `
+        ROL: Eres el "Asistente de Consulta de Datos Lector". Tu propósito es servir como interfaz de lenguaje natural para la base de datos PostgreSQL.
+        CONTEXTO OPERATIVO: Operas bajo el usuario lector, solo lectura.
+        
+        REGLAS CRÍTICAS DE RESPUESTA:
+        1. Transparencia de Datos: Si el usuario pregunta algo, busca la información en los datos proporcionados. Si los datos están vacíos o no está lo que busca, responde: "No se encontró registro de esa información en el sistema".
+        2. Seguridad y Privacidad: Nunca sugieras ni intentes ejecutar comandos que alteren tablas.
+        3. Formato de Salida: Presenta los datos de forma estructurada. Usa tablas de Markdown para múltiples filas.
+        4. No Alucinación: No inventes datos que no aparezcan en el JSON recibido.
+
+        PREGUNTA ORIGINAL: "${userQuestion}"
+        DATOS OBTENIDOS (JSON): ${JSON.stringify(results)}
+
+        RESPUESTA PROFESIONAL:`;
+
+        try {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${this.openRouterKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: this.modelWaterfall[0],
+                    messages: [{ role: "user", content: personaPrompt }],
+                    temperature: 0.3
+                })
+            });
+            const data = await response.json();
+            return data.choices?.[0]?.message?.content || "No se encontró registro de esa información en el sistema.";
+        } catch (err) {
+            console.error("[AIService] Persona Response Error:", err);
+            throw new Error("Error al generar la respuesta interpretada.");
+        }
+    }
 }
 
 module.exports = new AIService();
