@@ -10,12 +10,13 @@ class AIService {
     constructor() {
         this.openRouterKey = process.env.OPENROUTER_API_KEY || "";
         
-        // Waterfall logic for maximum reliability with free models
+        // Priority models for the new API key
         const defaultModels = [
             "google/gemini-2.0-flash:free",
             "google/gemini-2.0-flash-lite:free",
             "meta-llama/llama-3.3-70b-instruct:free",
             "google/gemma-3-27b-it:free",
+            "mistralai/pixtral-12b:free",
             "mistralai/mistral-7b-instruct:free"
         ];
         
@@ -173,41 +174,32 @@ class AIService {
         const today = now.split('T')[0];
         
         const sqlPrompt = `
-        Eres un generador de SQL experto para PostgreSQL. 
-        Tu tarea es convertir la pregunta del usuario en una ÚNICA consulta SELECT válida para el sistema de Agenda CNDES.
+        Eres un generador de SQL experto para PostgreSQL enfocado en el sistema CNDES. 
+        Tu objetivo es traducir la pregunta del usuario a una ÚNICA consulta SELECT válida.
         
-        CONTEXTO TEMPORAL:
-        - Fecha/Hora actual (ISO): ${now}
+        CONTEXTO ACTUAL:
+        - Fecha/Hora (ISO): ${now}
         - Hoy es: ${today}
 
-        ESQUEMA DE LA BASE DE DATOS:
-        - events (
-            id TEXT, 
-            title TEXT, 
-            "start" TEXT (ISO: 'YYYY-MM-DDTHH:mm:ss.sssZ'), 
-            "end" TEXT (ISO), 
-            location TEXT, 
-            description TEXT, 
-            participants TEXT (JSON string array, ej: '["Juan", "Maria"]'), 
-            attachments TEXT (JSON string array)
-          )
-        - users (id TEXT, username TEXT, name TEXT, role TEXT)
-        - locations (name TEXT)
-        - participants (name TEXT)
+        TABLAS DISPONIBLES:
+        - events (id, title, "start", "end", location, description, participants, attachments)
+          Nota: "start" y "end" son strings ISO (ej: '2026-03-16T08:00:00.000Z').
+          Nota: participants es un string que representa un array JSON (ej: '["Persona A", "Persona B"]').
+        - locations (name)
+        - participants (name)
+        - users (id, username, name, role)
 
-        REGLAS DE GENERACIÓN SQL:
-        1. SOLO consultas SELECT.
-        2. Búsqueda de texto: Usa ILIKE con comodines (ej: title ILIKE '%palabra%').
-        3. Fechas: Se guardan como STRING ISO. 
-           - Buscar por día exacto: WHERE "start" LIKE 'YYYY-MM-DD%'
-           - Buscar "hoy": WHERE "start" LIKE '${today}%'
-        4. Participantes: Como es un string JSON, busca con: participants ILIKE '%nombre%'
-        5. Orden: Por defecto ORDER BY "start" ASC.
-        6. Devuelve SOLO el SQL plano. Sin markdown.
-        7. Si la pregunta es saludo o charla no-datos, devuelve: SELECT 'CONVERSATIONAL';
-        8. Si no hay forma de consultar lo que pide, devuelve: SELECT 'NOT_FOUND';
+        REGLAS DE ORO:
+        1. SOLO SELECT. Prohibido INSERT, UPDATE, DELETE.
+        2. Búsquedas: Usa ILIKE con % (ej: title ILIKE '%reunión%').
+        3. Fechas: Para buscar por día, usa LIKE '${today}%' o filtros sobre el string.
+        4. Participantes: Como es JSON en string, usa: participants ILIKE '%nombre%'.
+        5. Límite: Responde con el SQL puro, sin bloques markdown (\`\`\`).
+        6. Estados especiales: 
+           - Si es saludo: SELECT 'CONVERSATIONAL';
+           - Si no hay datos: SELECT 'NOT_FOUND';
 
-        PREGUNTA DEL USUARIO: "${userQuestion}"
+        PREGUNTA: "${userQuestion}"
         
         SQL:`;
 
