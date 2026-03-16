@@ -153,48 +153,87 @@ class AIService {
         const db = require('./db');
         
         // 1. Generate SQL
+        const now = new Date().toISOString();
+        const today = now.split('T')[0];
+        
         const sqlPrompt = `
         Eres un generador de SQL experto para PostgreSQL. 
-        Tu tarea es convertir la pregunta del usuario en una ÚNICA consulta SELECT válida.
+        Tu tarea es convertir la pregunta del usuario en una ÚNICA consulta SELECT válida para el sistema de Agenda CNDES.
         
+        CONTEXTO TEMPORAL:
+        - Fecha/Hora actual (ISO): ${now}
+        - Hoy es: ${today}
+
         ESQUEMA DE LA BASE DE DATOS:
-        - events (id TEXT, title TEXT, "start" TEXT, "end" TEXT, location TEXT, description TEXT, participants TEXT (JSON array), attachments TEXT (JSON array))
+        - events (
+            id TEXT, 
+            title TEXT, 
+            "start" TEXT (Formato ISO: 'YYYY-MM-DDTHH:mm:ss.sssZ'), 
+            "end" TEXT (Formato ISO), 
+            location TEXT, 
+            description TEXT, 
+            participants TEXT (String JSON que representa un array de nombres, ej: '["Juan", "Maria"]'), 
+            attachments TEXT (String JSON)
+          )
         - users (id TEXT, username TEXT, name TEXT, role TEXT)
         - locations (name TEXT)
         - participants (name TEXT)
 
-        REGLAS:
-        - SOLO consultas SELECT.
-        - Devuelve ÚNICAMENTE el código SQL, sin explicaciones ni bloques de código markdown.
-        - Si la pregunta no se puede responder con este esquema, devuelve: SELECT 'NOT_FOUND';
-        - No intentes escribir (INSERT/UPDATE/DELETE).
+        REGLAS DE GENERACIÓN SQL:
+        1. SOLO consultas SELECT.
+        2. Usa ILIKE para búsquedas de texto parciales y que no dependan de mayúsculas (ej: title ILIKE '%reunión%').
+        3. Para fechas, recuerda que se guardan como TEXTO ISO. 
+           - Para buscar eventos de "hoy": WHERE "start" LIKE '${today}%'
+           - Para eventos en un rango: WHERE "start" >= '2026-03-16T00:00:00.000Z' AND "start" <= '2026-03-16T23:59:59.999Z'
+        4. Para buscar participantes: Dado que es un string JSON, usa: participants ILIKE '%nombre%'
+        5. IMPORTANTE: Ordena siempre por "start" ASC a menos que se pida lo contrario.
+        6. Devuelve ÚNICAMENTE el código SQL plano, sin bloques de código markdown ni explicaciones.
+        7. Si la pregunta es ambigua o no se puede responder, devuelve: SELECT 'NOT_FOUND';
 
         PREGUNTA DEL USUARIO: "${userQuestion}"
         
         SQL:`;
 
+        // 1. Generate SQL with Waterfall
         let generatedSQL = "";
-        try {
-            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${this.openRouterKey}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: this.modelWaterfall[0],
-                    messages: [{ role: "user", content: sqlPrompt }],
-                    temperature: 0.1
-                })
-            });
-            const data = await response.json();
-            generatedSQL = data.choices?.[0]?.message?.content?.trim() || "SELECT 'NOT_FOUND';";
-            // Clean markdown blocks if any
-            generatedSQL = generatedSQL.replace(/```sql/g, "").replace(/```/g, "").trim();
-            console.log(`[AIService] Generated SQL: ${generatedSQL}`);
-        } catch (err) {
-            console.error("[AIService] SQL Generation Error:", err);
-            throw new Error("Error al generar la consulta técnica.");
+        let sqlError = null;
+
+        for (const model of this.modelWaterfall) {
+            try {
+                console.log(`[AIService] Generating SQL with model: ${model}`);
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${this.openRouterKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [{ role: "user", content: sqlPrompt }],
+                        temperature: 0.1
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                generatedSQL = data.choices?.[0]?.message?.content?.trim() || "";
+                
+                // Clean markdown blocks if any
+                generatedSQL = generatedSQL.replace(/```sql/g, "").replace(/```/g, "").trim();
+                
+                if (generatedSQL) {
+                    console.log(`[AIService] Generated SQL: ${generatedSQL}`);
+                    break;
+                }
+            } catch (err) {
+                console.warn(`[AIService] SQL generation failed with model ${model}: ${err.message}`);
+                sqlError = err;
+            }
+        }
+
+        if (!generatedSQL) {
+            throw sqlError || new Error("No se pudo generar la consulta técnica.");
         }
 
         // 2. Execute SQL
@@ -205,20 +244,21 @@ class AIService {
             } else {
                 results = await db.queryAsLector(generatedSQL);
             }
+            console.log(`[AIService] DB returned ${results.length} rows.`);
         } catch (err) {
             console.error("[AIService] SQL Execution Error:", err, "SQL:", generatedSQL);
-            return `Lo siento, hubo un error técnico al consultar la base de datos: ${err.message}`;
+            return `Lo siento, hubo un error técnico al consultar la base de datos. (Error: ${err.message})`;
         }
 
-        // 3. Interpret Results with the Persona
+        // 3. Interpret Results with Waterfall
         const personaPrompt = `
         ROL: Eres el "Asistente de Consulta de Datos Lector". Tu propósito es servir como interfaz de lenguaje natural para la base de datos PostgreSQL.
         CONTEXTO OPERATIVO: Operas bajo el usuario lector, solo lectura.
         
         REGLAS CRÍTICAS DE RESPUESTA:
-        1. Transparencia de Datos: Si el usuario pregunta algo, busca la información en los datos proporcionados. Si los datos están vacíos o no está lo que busca, responde: "No se encontró registro de esa información en el sistema".
+        1. Transparencia de Datos: Si el usuario pregunta algo, busca la información en los datos proporcionados. Si los datos están vacíos o no está coinciden con lo que busca, responde EXACTAMENTE: "No se encontró registro de esa información en el sistema".
         2. Seguridad y Privacidad: Nunca sugieras ni intentes ejecutar comandos que alteren tablas.
-        3. Formato de Salida: Presenta los datos de forma estructurada. Usa tablas de Markdown para múltiples filas.
+        3. Formato de Salida: Presenta los datos de forma estructurada. Usa tablas de Markdown para múltiples filas. Muy importante: Sé profesional y técnico.
         4. No Alucinación: No inventes datos que no aparezcan en el JSON recibido.
 
         PREGUNTA ORIGINAL: "${userQuestion}"
@@ -226,25 +266,32 @@ class AIService {
 
         RESPUESTA PROFESIONAL:`;
 
-        try {
-            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${this.openRouterKey}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: this.modelWaterfall[0],
-                    messages: [{ role: "user", content: personaPrompt }],
-                    temperature: 0.3
-                })
-            });
-            const data = await response.json();
-            return data.choices?.[0]?.message?.content || "No se encontró registro de esa información en el sistema.";
-        } catch (err) {
-            console.error("[AIService] Persona Response Error:", err);
-            throw new Error("Error al generar la respuesta interpretada.");
+        for (const model of this.modelWaterfall) {
+            try {
+                console.log(`[AIService] Interpreting results with model: ${model}`);
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${this.openRouterKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [{ role: "user", content: personaPrompt }],
+                        temperature: 0.3
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                return data.choices?.[0]?.message?.content || "No se encontró registro de esa información en el sistema.";
+            } catch (err) {
+                console.warn(`[AIService] Interpretation failed with model ${model}: ${err.message}`);
+            }
         }
+
+        return "Lo siento, el servicio de interpretación de datos no está disponible en este momento.";
     }
 }
 
