@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, Filter, Download, Printer, ChevronRight, Search, FileText, X, LayoutTemplate } from 'lucide-react';
+import { Calendar, Filter, Download, Printer, ChevronRight, Search, FileText, X, LayoutTemplate, MapPin } from 'lucide-react';
 import { useCalendar } from '../context/CalendarContext';
 import { generateRangeReport } from '../utils/pdfGenerator';
 
