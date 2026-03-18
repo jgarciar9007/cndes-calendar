@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, Filter, Download, Printer, ChevronRight, Search, Clock, MapPin, Users, FileText, X, LayoutTemplate } from 'lucide-react';
+import { Calendar, Filter, Download, Printer, ChevronRight, Search, FileText, X, LayoutTemplate } from 'lucide-react';
 import { useCalendar } from '../context/CalendarContext';
 import { generateRangeReport } from '../utils/pdfGenerator';
 
@@ -202,34 +202,20 @@ const Reports = () => {
                                                 key={event.id}
                                                 className="group relative flex flex-col md:flex-row items-start md:items-center gap-6 p-6 md:p-8 bg-slate-50/50 rounded-[2rem] border border-transparent hover:border-slate-200 hover:bg-white hover:shadow-2xl hover:shadow-slate-200/40 transition-all duration-300"
                                             >
-                                                {/* Time & Place Indicator */}
-                                                <div className="flex items-center gap-4 min-w-[140px]">
-                                                    <div className="flex flex-col items-center justify-center w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
-                                                        <Clock size={16} className="text-primary-600 mb-1" />
-                                                        <span className="text-[10px] font-black text-slate-900">{format(new Date(event.start), 'HH:mm')}</span>
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Finaliza</span>
-                                                        <span className="text-[11px] font-bold text-slate-600">{format(new Date(event.end), 'HH:mm')}</span>
-                                                    </div>
-                                                </div>
-
                                                 {/* Content */}
-                                                <div className="flex-1 flex flex-col gap-2">
-                                                    <h3 className="text-[17px] font-black text-slate-900 leading-tight group-hover:text-primary-600 transition-colors uppercase first-letter:text-2xl">
-                                                        {event.title}
-                                                    </h3>
-                                                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                                                        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                                                            <MapPin size={12} className="text-slate-400" />
+                                                <div className="flex-1 flex flex-col gap-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <h3 className="text-[17px] font-black text-slate-900 leading-tight group-hover:text-primary-600 transition-colors uppercase">
+                                                            {event.title}
+                                                        </h3>
+                                                        <div className="px-4 py-1.5 bg-white border border-slate-100 rounded-xl shadow-sm text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                                             {event.location}
                                                         </div>
-                                                        {event.participants && event.participants.length > 0 && (
-                                                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                                                                <Users size={12} className="text-slate-400" />
-                                                                {event.participants.length} Participantes
-                                                            </div>
-                                                        )}
+                                                    </div>
+                                                    <div className="p-4 bg-white/50 rounded-2xl border border-slate-100 group-hover:bg-white transition-colors">
+                                                        <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                                                            {event.description || 'Sin descripción detallada para esta actividad.'}
+                                                        </p>
                                                     </div>
                                                 </div>
 
