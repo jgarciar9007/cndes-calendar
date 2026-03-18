@@ -7,7 +7,7 @@ const fs = require('fs-extra');
 const helmet = require('helmet');
 const compression = require('compression');
 const crypto = require('crypto');
-const db = require('./db'); // Import DB module
+const db = require('./db'); 
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,7 +21,6 @@ const safeUUID = () => {
 };
 
 // Middleware
-// Middleware de seguridad relajado para acceso por IP local
 app.use(compression());
 app.use(helmet({
     contentSecurityPolicy: false,
@@ -39,7 +38,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Ensure uploads directory exists
 fs.ensureDirSync(path.join(__dirname, 'uploads'));
 
-// Initialize Database
 // Initialize Database
 db.init().catch(err => {
     console.error("Database initialization failed:", err);
@@ -129,8 +127,6 @@ app.post('/api/auth/login', async (req, res) => {
         const user = await db.users.getByUsername(username);
 
         if (user && user.password === password) {
-            // In a real app, use hashing (bcrypt) and JWT tokens.
-            // For now, returning user info matching current simple implementation.
             res.json({
                 success: true,
                 user: {
@@ -149,37 +145,6 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-app.post('/api/auth/change-password', async (req, res) => {
-    try {
-        const { username, currentPassword, newPassword } = req.body;
-
-        if (!username || !currentPassword || !newPassword) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        const user = await db.users.getByUsername(username);
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Verify current password
-        if (user.password !== currentPassword) {
-            return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
-        }
-
-        const success = await db.users.updatePassword(user.id, newPassword);
-        if (success) {
-            res.json({ success: true });
-        } else {
-            res.status(500).json({ error: 'Failed to update password' });
-        }
-    } catch (error) {
-        console.error("Password change error:", error);
-        res.status(500).json({ error: 'Operation failed' });
-    }
-});
-
 const aiService = require('./ai.service');
 
 // FILE UPLOAD & AI PROCESSING
@@ -194,24 +159,19 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
         size: req.file.size,
         type: req.file.mimetype,
         data: fileUrl,
-        path: req.file.path // Relative path for server-side processing
+        path: req.file.path 
     });
 });
 
 app.post('/api/ai/process-document', async (req, res) => {
     try {
         const { filePath, mimeType } = req.body;
-        if (!filePath) {
-            return res.status(400).json({ error: 'Missing filePath' });
-        }
+        if (!filePath) return res.status(400).json({ error: 'Missing filePath' });
 
-        // Security & Resolution: Ensure filePath is within the uploads directory
-        // Handle both relative paths, absolute paths and URLs (/uploads/...)
         const uploadsDir = path.join(__dirname, 'uploads');
         let relativePath = filePath;
         
         if (filePath.includes('uploads')) {
-            // Strip everything before 'uploads' to get a relative path we can trust
             const parts = filePath.split(path.sep === '/' ? '/' : /[\\\/]/);
             const uploadsIndex = parts.indexOf('uploads');
             if (uploadsIndex !== -1) {
@@ -223,13 +183,7 @@ app.post('/api/ai/process-document', async (req, res) => {
 
         const absolutePath = path.join(uploadsDir, relativePath);
 
-        if (!absolutePath.startsWith(uploadsDir)) {
-            console.error("Access denied to path:", absolutePath, "Uploads dir:", uploadsDir);
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
         if (!fs.existsSync(absolutePath)) {
-            console.error("File not found for AI processing:", absolutePath);
             return res.status(404).json({ error: 'File not found' });
         }
 
@@ -237,30 +191,7 @@ app.post('/api/ai/process-document', async (req, res) => {
         res.json(activities);
     } catch (error) {
         console.error("AI Processing error:", error);
-        res.status(500).json({ 
-            error: error.message || 'Error interno al procesar el documento.',
-            details: error.toString()
-        });
-    }
-});
-
-app.post('/api/ai/query', async (req, res) => {
-    try {
-        const { question } = req.body;
-        console.log(`[LectorAPI] Question: ${question}`);
-        if (!question) {
-            return res.status(400).json({ error: 'Falta la pregunta.' });
-        }
-
-        const answer = await aiService.askLector(question);
-        res.json({ answer });
-    } catch (error) {
-        console.error("CRITICAL Lector Assistant Error:", error);
-        res.status(500).json({ 
-            error: error.message || 'Error interno.',
-            details: error.toString(),
-            stack: error.stack
-        });
+        res.status(500).json({ error: error.message || 'Error al procesar el documento.' });
     }
 });
 

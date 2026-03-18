@@ -123,3 +123,94 @@ export const generateDailyAgenda = async (date, allEvents) => {
         alert("Error al generar el PDF. Verifica que la imagen de cabecera exista.");
     }
 };
+
+export const generateRangeReport = async (startDate, endDate, filteredEvents, reportTitle = "REPORTE DE ACTIVIDADES") => {
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const rangeStr = `${format(startDate, 'd MMM yyyy', { locale: es })} - ${format(endDate, 'd MMM yyyy', { locale: es })}`;
+
+    try {
+        const img = await loadImage('/cndes-header.png');
+        const imgProps = doc.getImageProperties(img);
+        const imgWidth = 50;
+        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+        
+        doc.addImage(img, 'PNG', 14, 10, imgWidth, imgHeight);
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        doc.setFontSize(18);
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text(reportTitle.toUpperCase(), pageWidth / 2, imgHeight + 15, { align: 'center' });
+
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.setFont('helvetica', 'normal');
+        doc.text(rangeStr, pageWidth / 2, imgHeight + 22, { align: 'center' });
+
+        // Group by day
+        const grouped = filteredEvents.reduce((acc, event) => {
+            const dateKey = format(new Date(event.start), 'yyyy-MM-dd');
+            if (!acc[dateKey]) acc[dateKey] = [];
+            acc[dateKey].push(event);
+            return acc;
+        }, {});
+
+        const sortedDates = Object.keys(grouped).sort();
+        let currentY = imgHeight + 35;
+
+        for (const dateKey of sortedDates) {
+            const events = grouped[dateKey].sort((a, b) => new Date(a.start) - new Date(b.start));
+            const displayDate = format(new Date(dateKey + 'T12:00:00'), 'EEEE, d MMMM yyyy', { locale: es });
+
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(22, 163, 74);
+            doc.text(displayDate.toUpperCase(), 14, currentY);
+            currentY += 5;
+
+            const tableColumn = ["Horario", "Lugar", "Asunto", "Participantes"];
+            const tableRows = events.map(event => [
+                `${format(new Date(event.start), 'HH:mm')} - ${format(new Date(event.end), 'HH:mm')}`,
+                event.location || '',
+                event.title || '',
+                Array.isArray(event.participants) ? event.participants.join(', ') : (event.participants || '')
+            ]);
+
+            autoTable(doc, {
+                startY: currentY,
+                head: [tableColumn],
+                body: tableRows,
+                theme: 'grid',
+                styles: { fontSize: 9, cellPadding: 2.5 },
+                headStyles: { fillColor: [22, 163, 74] },
+                columnStyles: {
+                    0: { cellWidth: 35, halign: 'center' },
+                    1: { cellWidth: 45 },
+                    2: { cellWidth: 70 },
+                    3: { cellWidth: 'auto' }
+                },
+                margin: { top: 10, bottom: 20 },
+                didDrawPage: (data) => {
+                    // Footer on every page
+                    doc.setFontSize(8);
+                    doc.setTextColor(150);
+                    doc.text('Generado por Sistema de Gestión CNDES - Reporte Dinámico', 14, doc.internal.pageSize.height - 10);
+                }
+            });
+
+            currentY = doc.lastAutoTable.finalY + 15;
+            
+            // If near bottom, add new page
+            if (currentY > doc.internal.pageSize.height - 30) {
+                doc.addPage();
+                currentY = 20;
+            }
+        }
+
+        doc.save(`Reporte_CNDES_${format(new Date(), 'yyyyMMdd_HHmm')}.pdf`);
+
+    } catch (error) {
+        console.error("Error generating Range Report:", error);
+        alert("Error al generar el reporte.");
+    }
+};

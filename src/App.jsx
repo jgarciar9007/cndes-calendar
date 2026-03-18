@@ -5,6 +5,7 @@ import { CalendarProvider } from './context/CalendarContext';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Reports from './pages/Reports';
 
 function App() {
     return (
@@ -17,6 +18,7 @@ function App() {
                             <Layout>
                                 <Routes>
                                     <Route path="/" element={<Home />} />
+                                    <Route path="/reports" element={<Reports />} />
                                 </Routes>
                             </Layout>
                         } />

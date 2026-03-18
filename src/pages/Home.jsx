@@ -11,7 +11,6 @@ import Modal from '../components/common/Modal';
 import EventForm from '../components/calendar/EventForm';
 import AgendaUploadModal from '../components/calendar/AgendaUploadModal';
 import { generateDailyAgenda } from '../utils/pdfGenerator';
-import LectorAssistant from '../components/common/LectorAssistant';
 
 const Home = () => {
     const { view, setView, currentDate, nextMonth, prevMonth, setCurrentDate, events } = useCalendar();
@@ -288,7 +287,6 @@ const Home = () => {
                 </div>
             </Modal>
 
-            <LectorAssistant />
         </div>
     );
 };

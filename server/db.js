@@ -9,15 +9,6 @@ const pool = new Pool({
     max: 20
 });
 
-const lectorPool = new Pool({
-    host: process.env.LECTOR_HOST || process.env.DB_HOST || 'localhost',
-    user: process.env.LECTOR_USER || 'lector',
-    password: process.env.LECTOR_PASSWORD || 'Cndes2026*',
-    database: process.env.LECTOR_DB || process.env.DB_NAME || 'calendar_db',
-    port: process.env.DB_PORT || 5432,
-    max: 5
-});
-
 async function init() {
     const client = await pool.connect();
     try {
@@ -167,16 +158,10 @@ const participantQueries = {
     }
 };
 
-const queryAsLector = async (text, params) => {
-    const res = await lectorPool.query(text, params);
-    return res.rows;
-};
-
 module.exports = {
     init,
     events: eventQueries,
     locations: locationQueries,
     participants: participantQueries,
-    users: userQueries,
-    queryAsLector
+    users: userQueries
 };

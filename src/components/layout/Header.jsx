@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, LogOut, ShieldCheck, ChevronDown } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCalendar } from '../../context/CalendarContext';
 import UserProfileModal from './UserProfileModal';
@@ -10,6 +10,7 @@ const Header = () => {
     const { user, logout } = useAuth();
     const { setView, setCurrentDate } = useCalendar();
     const navigate = useNavigate();
+    const location = useLocation();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -52,6 +53,30 @@ const Header = () => {
                             </span>
                         </div>
                     </a>
+
+                    {/* Navigation Menu */}
+                    <nav className="hidden lg:flex items-center gap-2 p-1 bg-slate-100 rounded-[1.25rem] border border-slate-200/50">
+                        <Link 
+                            to="/" 
+                            className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all ${
+                                location.pathname === '/' 
+                                ? 'bg-white text-primary-600 shadow-sm' 
+                                : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
+                            }`}
+                        >
+                            Calendario
+                        </Link>
+                        <Link 
+                            to="/reports" 
+                            className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all ${
+                                location.pathname === '/reports' 
+                                ? 'bg-white text-primary-600 shadow-sm' 
+                                : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
+                            }`}
+                        >
+                            Informes
+                        </Link>
+                    </nav>
 
                     {/* Navigation/User Section */}
                     <div className="flex items-center gap-6">

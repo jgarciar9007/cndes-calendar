@@ -3,28 +3,32 @@ const fetch = require("node-fetch");
 const pdf = require("pdf-parse");
 
 /**
- * AI Service V9 (RESILIENCE MAX)
+ * AI Service V11 (CLEANED)
+ * Focus: Intelligent PDF/Document Analysis
  */
 class AIService {
     constructor() {
         this.openRouterKey = (process.env.OPENROUTER_API_KEY || "").trim();
         this.geminiKey = (process.env.GEMINI_API_KEY || "").trim();
         
-        // Use very generic model IDs that OpenRouter usually routes correctly
+        // Waterfall with high-reliability models
         this.modelWaterfall = [
-            "openrouter/auto",                // Let OpenRouter decide (Best for reliability)
-            "google/gemini-2.0-flash-lite:free",
+            "google/gemini-2.0-flash:free",
+            "google/gemini-2.0-flash-lite:preview-02-05:free",
+            "google/gemini-2.0-flash-exp:free",
             "meta-llama/llama-3.3-70b-instruct:free",
-            "google/gemma-3-27b-it:free",
             "mistralai/mistral-7b-instruct:free",
-            "openrouter/free"                 // Any free model
+            "openrouter/auto"
         ];
         
-        console.log("[AIService] Resilience Max initialized.");
+        console.log("[AIService] Initialized for Document Analysis.");
     }
 
+    /**
+     * PDF/DOCUMENT ANALYSIS LOGIC (EXTREMELY PRESERVED)
+     */
     async processDocument(filePath, mimeType) {
-        console.log(`[AIService] Doc: ${filePath}`);
+        console.log(`[AIService] Processing: ${filePath}`);
         try {
             let documentText = "";
             if (mimeType === "application/pdf") {
@@ -52,7 +56,6 @@ ${cleanText.substring(0, 15000)}`;
             // 1. OpenRouter with exhaustive waterfall
             for (const model of this.modelWaterfall) {
                 try {
-                    console.log(`[AIService] OR Try: ${model}`);
                     const content = await this.callOpenRouter(prompt, model);
                     if (content) return this.parseJSON(content);
                 } catch (err) {
@@ -61,10 +64,9 @@ ${cleanText.substring(0, 15000)}`;
                 }
             }
 
-            // 2. Direct Gemini Fallback - Fixing the URL and model
+            // 2. Direct Gemini Fallback
             if (this.geminiKey) {
                 try {
-                    console.log("[AIService] Trying Direct Gemini (gemini-1.5-flash)...");
                     const content = await this.callDirectGemini(prompt, "gemini-1.5-flash");
                     return this.parseJSON(content);
                 } catch (err) {
@@ -72,22 +74,23 @@ ${cleanText.substring(0, 15000)}`;
                 }
             }
 
-            throw new Error("Saturación total. Prueba de nuevo en 1 min.");
+            throw new Error("Saturación total en servicios de IA. Prueba de nuevo en unos minutos.");
 
         } catch (error) {
-            console.error("[AIService] Global Error:", error);
+            console.error("[AIService] Extraction error:", error);
             throw error;
         }
     }
 
     async callOpenRouter(prompt, model) {
+        if (!this.openRouterKey) throw new Error("Missing OpenRouter Key");
         const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${this.openRouterKey}`,
                 "Content-Type": "application/json",
                 "HTTP-Referer": "https://cndes-calendar.local",
-                "X-Title": "CNDES Assistant"
+                "X-Title": "CNDES AI Extractor"
             },
             body: JSON.stringify({
                 model: model,
@@ -106,7 +109,7 @@ ${cleanText.substring(0, 15000)}`;
     }
 
     async callDirectGemini(prompt, model) {
-        // v1beta is correct for flash
+        if (!this.geminiKey) throw new Error("Missing Gemini Key");
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiKey}`;
         const res = await fetch(url, {
             method: "POST",
@@ -137,26 +140,7 @@ ${cleanText.substring(0, 15000)}`;
         } catch (e) {
             const match = text.match(/\[[\s\S]*\]/);
             if (match) return JSON.parse(match[0]);
-            throw new Error("Invalid JSON");
-        }
-    }
-
-    async askLector(question) {
-        try {
-            const db = require('./db');
-            if (question.toLowerCase().match(/^(hola|saludos|buenos)/)) return "¡Hola! Soy tu asistente CNDES.";
-
-            const sqlPrompt = `Genera SQL SELECT para: "${question}". Tablas: events, locations. Responde solo el SQL.`;
-            const sqlRaw = await this.callOpenRouter(sqlPrompt, "openrouter/auto");
-            const sql = sqlRaw.replace(/```sql/gi, "").replace(/```/g, "").trim();
-            
-            if (!sql.toUpperCase().includes('SELECT')) return "No pude procesar la consulta.";
-
-            const results = await db.queryAsLector(sql);
-            const interpretPrompt = `Responde a "${question}" usando: ${JSON.stringify(results.slice(0, 10))}. NO menciones SQL.`;
-            return await this.callOpenRouter(interpretPrompt, "openrouter/auto");
-        } catch (err) {
-            return "No hay datos para esa consulta.";
+            throw new Error("Invalid JSON extraction format.");
         }
     }
 }
